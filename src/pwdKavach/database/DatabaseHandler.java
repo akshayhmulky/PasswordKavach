@@ -10,10 +10,13 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.sqlite.SQLiteConfig;
+import org.sqlite.SQLiteConfig.LockingMode;
 import pwdKavach.ui.login.LoginForm;
 
 /**
@@ -33,8 +36,13 @@ public class DatabaseHandler {
 
     //create connection
     private void createConnection() {
+        
+            final SQLiteConfig config = new SQLiteConfig();
+            config.setReadOnly(false);
+            config.enforceForeignKeys(true);  // to make child record delete on deletion of group
+            
         try {
-            conn = DriverManager.getConnection("jdbc:sqlite:pwdKavach.db");
+            conn = DriverManager.getConnection("jdbc:sqlite:pwdKavach.db", config.toProperties());
         } catch (SQLException e) {
             System.out.println("Create connection exception" + e.getMessage());
         }
@@ -221,7 +229,7 @@ public class DatabaseHandler {
             
             rs = preparedStatement.executeQuery();
             
-        } catch (Exception e) {
+        } catch (SQLException e) {
             System.out.println("getAccountResultSet error" + e.getMessage());
             return null;
         }
@@ -256,6 +264,7 @@ public class DatabaseHandler {
             statement.setString(5, password);
             statement.setString(6, url);
             statement.setString(7, group);
+
             
             if(statement.executeUpdate() >0){
                 return true;
@@ -302,6 +311,7 @@ public class DatabaseHandler {
               preparedStatement = conn.prepareStatement(insertQuery);
               preparedStatement.setInt(1, idUser);
               preparedStatement.setString(2, groupname); // required for Insert query
+              
                
               int result = preparedStatement.executeUpdate(); //incase of insert, update , delete use executeUpdate, returns 1 or 0
               return (result == 1);
@@ -310,8 +320,19 @@ public class DatabaseHandler {
         } catch (Exception e) {
             System.out.println("Insert Group error" +e.getMessage());            
         }
-
+//       finally // for elmininating database lock issue
+//     {
+//         try {
+//              
+//              preparedStatement.closeOnCompletion();
+//              
+//               
+//           } catch (SQLException e) {
+//        }
+//      }
+        
         return false;
+        
         
     }
     
@@ -322,7 +343,7 @@ public class DatabaseHandler {
       String query = "SELECT * FROM GROUPS INNER JOIN USERS ON (GROUPS.id_user = Users.id) WHERE GROUPS.id_user = '" + LoginForm.getID() + "'";
       ArrayList<String> list = new ArrayList<>();
    
-    System.out.println("Group ID: "+LoginForm.getID());
+    System.out.println("User ID: "+LoginForm.getID());
 //         
      if(!group.isEmpty())
     {
@@ -343,10 +364,10 @@ public class DatabaseHandler {
                 preparedStatement.setString(i + 1, "%"+list.get(i)+ "%");                
             }           
             rs = preparedStatement.executeQuery();
-            System.out.println("group rs:" +rs.getString("groupname"));
+            //System.out.println("group rs:" +rs.getString("groupname"));
           
-        } catch (Exception e) {
-            System.out.println("getAccountResultSet error" + e.getMessage());
+        } catch (SQLException e) {
+            System.out.println("getGroupResultSet error" + e.getMessage());
             return null;
         }
 
@@ -437,6 +458,95 @@ public class DatabaseHandler {
         }
        return false;
     }
+    
+    
+    public boolean deleteGroup(int id){
+        
+       // String query = "DELETE FROM groups WHERE id = ?";
+        //String queryDeleteChild= "DELETE FROM account WHERE id_group = ?";
+       // String query = "DELETE groups, account FROM groups INNER JOIN account ON (groups.id = account.id_group) WHERE GROUPS.id_user = '" + LoginForm.getID() + "'";
+        //"SELECT * FROM GROUPS INNER JOIN USERS ON (GROUPS.id_user = Users.id) WHERE GROUPS.id_user = '" + LoginForm.getID() + "'";        
+        //String query = "DELETE groups, account FROM groups INNER JOIN account ON (groups.id = account.id_group) WHERE GROUPS.id_user = '" + LoginForm.getID() + "' AND id = ?";
+        String query = "DELETE FROM groups WHERE id = ?";
+        
+        try {
+        PreparedStatement statement = conn.prepareStatement(query);
+        statement.setInt(1, id);
+        
+        int result = statement.executeUpdate();
+        return (result > 0);
+            
+        } catch (Exception e) 
+        {
+            System.out.println("Delete Group error: " +e.getMessage());
+        }
+       return false;
+    }
+    
+    
+    public boolean updateAccountTable(int accountID, String title, String username, String password, String url, String groupname){
+        
+        String query = "UPDATE account SET" +
+                " title = ?," +
+                " username = ?," +
+                " password = ?," +
+                " url = ?," +
+                " groupname = ?" +
+                " WHERE id = ?";
+                
+        try {
+            PreparedStatement statement = conn.prepareStatement(query);
+            statement.setString(1, title);
+            statement.setString(2, username);
+            statement.setString(3, password);
+            statement.setString(4, url);
+            statement.setString(5, groupname);
+            statement.setInt(6, accountID);
+            
+            int result = statement.executeUpdate();
+            
+            return (result > 0);
+            
+        } catch (SQLException e) {
+            
+            System.out.println("update orders table exception" +e.getMessage());
+        }
+ 
+        return false;
+    }
+    
+    public boolean updateGroupTable(int groupID, String groupname){
+
+        String query1 = "UPDATE groups SET groupname = ? WHERE id = ?";
+        String query2=  "UPDATE account SET groupname = ? WHERE id_group = ?";
+        PreparedStatement  pst =null;
+
+
+      try{
+     pst = conn.prepareStatement(query1);
+     pst.setString(1, groupname);
+     pst.setInt(2, groupID);
+     pst.execute();
+
+     pst = conn.prepareStatement(query2);
+     pst.setString(1, groupname);
+     pst.setInt(2, groupID);
+     pst.execute();
+     
+     return true;
+     }catch(SQLException e){
+     System.out.println("update orders table exception" +e.getMessage());
+    }   
+          
+        return false;
+    }
+    
+   
+    
+    
+    
+    
+    
     
     
     

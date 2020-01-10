@@ -5,6 +5,7 @@
  */
 package pwdKavach.main;
 
+import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.sql.ResultSet;
@@ -34,23 +35,31 @@ public class MainFrame extends javax.swing.JFrame {
      */
    
  DatabaseHandler handler = null;   
- private static int groupID = -1;
- private static int accountID = -1;
+// private static int groupID = -1;
+// private static int accountID = -1;
  boolean groupItemSelected = false;
+ private boolean consume = false;
     
     public MainFrame() {
         handler = DatabaseHandler.getInstance();
         initComponents();
-        loadAllCategories();
-        loadAllListTable();
-        TableListSelection();
+        
+        if(!isListTableEmpty()){
+            loadAllCategories();
+            loadAllListTable();
+            TableListSelection();
+            tblList.requestFocus();
+            tblList.changeSelection(0,0,false, false);
+       }
+
+        
         //TableListSelection();  //Acts lits list selection changes Trigger
         lblWelcomeMessage.setText("Hello, " + handler.getUsername(LoginForm.getID()));
         //loadAllListCategories();
         tblAccountTable.setName("loadAll");
         
-        tblList.requestFocus();
-        tblList.changeSelection(0,0,false, false);
+        //tblList.requestFocus();
+        //tblList.changeSelection(0,0,false, false);
         //listGroup.setSelectedValue("Banking", true);
     }
 
@@ -64,15 +73,18 @@ public class MainFrame extends javax.swing.JFrame {
 //        return listGroupToBeSent;   
 //    }
   
-    
-    public static int getgroupID(){ //Can use this to get groupid in MainFrame using ID
-        
-        return groupID; //declared in the top as static, so only static method can use this variable
+    public boolean isListTableEmpty() {
+        if (tblList != null && tblList.getModel() != null) {
+            return tblList.getModel().getRowCount()<=0?true:false;
+        }
+        return false;
     }
     
-     public static int getaccountID(){ //Can use this to get record in MainFrame using ID
-        
-        return accountID; //declared in the top as static, so only static method can use this variable
+    public boolean isAccountTableEmpty() {
+        if (tblAccountTable != null && tblAccountTable.getModel() != null) {
+            return tblAccountTable.getModel().getRowCount()<=0?true:false;
+        }
+        return false;
     }
     
     private void loadAllCategories(){
@@ -85,8 +97,11 @@ public class MainFrame extends javax.swing.JFrame {
     {
     String columnNames[] = {"Title", "Username", "Password", "URL", "Group"}; //Set table names
     
+    //Making table cell uneditable
     DefaultTableModel tableModel = new DefaultTableModel();
+     
     tableModel.setColumnIdentifiers(columnNames);
+//    tblAccountTable.setEnabled(false); // NEED TO CHECK
         
     ResultSet resultSet =  handler.getAccountResultSet(groupname, accountName);
     
@@ -127,8 +142,10 @@ public class MainFrame extends javax.swing.JFrame {
             System.out.println("FillAccountTable error" + e.getMessage());
         }
         
+       tblAccountTable.setDefaultEditor(Object.class, null); //Disable editing option
         tblAccountTable.setModel(tableModel);
         //tableModel.fireTableDataChanged();
+        
     }
    
     private void loadAllListTable(){
@@ -139,12 +156,9 @@ public class MainFrame extends javax.swing.JFrame {
     {
     String columnNames[] = {"Group"}; //Set table names
     
-    DefaultTableModel tableModel = new DefaultTableModel();
-    tableModel.setColumnIdentifiers(columnNames);
-        
+    DefaultTableModel tableModel = new DefaultTableModel();    
+    tableModel.setColumnIdentifiers(columnNames);       
     ResultSet resultSet =  handler.getGroupResultSet(groupname);
-    
-    
     if(resultSet == null)
     {
         JOptionPane.showMessageDialog(null, "An error occured no ResultSet, main.java", "Error", JOptionPane.ERROR_MESSAGE);
@@ -165,15 +179,19 @@ public class MainFrame extends javax.swing.JFrame {
                 
                 tableModel.addRow(row);
                 
-                
+//                TableListSelection();  // on changing list table select its res data in right table
+//                tblList.requestFocus();
+//                tblList.changeSelection(0,0,false, false);
             }
             
         } catch (SQLException e) {
             System.out.println("FillAccountTable error" + e.getMessage());
         }
         
-        tblList.setModel(tableModel);
-        //tableModel.fireTableDataChanged();
+           tblList.setDefaultEditor(Object.class, null); //Disable editing option
+           tblList.setModel(tableModel);
+            //tableModel.fireTableDataChanged();
+        //}
     }
     
     
@@ -188,6 +206,10 @@ public class MainFrame extends javax.swing.JFrame {
 
         jPopupMenu1 = new javax.swing.JPopupMenu();
         btnDeletePopUpMenu = new javax.swing.JMenuItem();
+        btnEditPopupMenu = new javax.swing.JMenuItem();
+        jPopupMenu2 = new javax.swing.JPopupMenu();
+        btnDeleteGroup = new javax.swing.JMenuItem();
+        btnEditGroup = new javax.swing.JMenuItem();
         lblWelcomeMessage = new javax.swing.JLabel();
         jScrollPane1 = new javax.swing.JScrollPane();
         tblAccountTable = new javax.swing.JTable();
@@ -204,6 +226,30 @@ public class MainFrame extends javax.swing.JFrame {
             }
         });
         jPopupMenu1.add(btnDeletePopUpMenu);
+
+        btnEditPopupMenu.setText("Edit");
+        btnEditPopupMenu.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnEditPopupMenuActionPerformed(evt);
+            }
+        });
+        jPopupMenu1.add(btnEditPopupMenu);
+
+        btnDeleteGroup.setText("Delete");
+        btnDeleteGroup.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnDeleteGroupActionPerformed(evt);
+            }
+        });
+        jPopupMenu2.add(btnDeleteGroup);
+
+        btnEditGroup.setText("Edit");
+        btnEditGroup.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnEditGroupActionPerformed(evt);
+            }
+        });
+        jPopupMenu2.add(btnEditGroup);
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -225,6 +271,11 @@ public class MainFrame extends javax.swing.JFrame {
         tblAccountTable.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseReleased(java.awt.event.MouseEvent evt) {
                 tblAccountTableMouseReleased(evt);
+            }
+        });
+        tblAccountTable.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyReleased(java.awt.event.KeyEvent evt) {
+                tblAccountTableKeyReleased(evt);
             }
         });
         jScrollPane1.setViewportView(tblAccountTable);
@@ -274,10 +325,16 @@ public class MainFrame extends javax.swing.JFrame {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 tblListMouseClicked(evt);
             }
+            public void mouseReleased(java.awt.event.MouseEvent evt) {
+                tblListMouseReleased(evt);
+            }
         });
         tblList.addKeyListener(new java.awt.event.KeyAdapter() {
             public void keyPressed(java.awt.event.KeyEvent evt) {
                 tblListKeyPressed(evt);
+            }
+            public void keyReleased(java.awt.event.KeyEvent evt) {
+                tblListKeyReleased(evt);
             }
         });
         jScrollPane3.setViewportView(tblList);
@@ -362,6 +419,9 @@ public class MainFrame extends javax.swing.JFrame {
 
                 tblList.requestFocus();
                 tblList.changeSelection(selectedIndexFromComboBox,0,false, false);
+                //IF NEED TO SELECT LAST ELEMENAT OF A ACCOUNT TABLE THEN CAN USE THIS
+//                int lastRow = tblAccountTable.convertRowIndexToView(tblAccountTable.getRowCount() - 1);
+//                tblAccountTable.setRowSelectionInterval(lastRow, lastRow);
                 
                 
               //}   
@@ -372,9 +432,11 @@ public class MainFrame extends javax.swing.JFrame {
        
     }//GEN-LAST:event_btnAddEntryActionPerformed
   
+    
     //Update the table based on selection of List table
     public void TableListSelection(){
         
+        if(!isListTableEmpty()){
         ListSelectionModel model = tblList.getSelectionModel();
         model.addListSelectionListener(new ListSelectionListener(){
 
@@ -396,6 +458,7 @@ public class MainFrame extends javax.swing.JFrame {
                }
             }
         });
+        }
     }
     
     
@@ -404,29 +467,20 @@ public class MainFrame extends javax.swing.JFrame {
         AddGroup addGroup = new AddGroup();
         addGroup.pack();
         addGroup.setLocationRelativeTo(null);
+        addGroup.setGroupButton("ADD");
         addGroup.setVisible(true);
         
         addGroup.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
         
-        //addGroup.addWindowListener(null);
-        //actions to be performed on closure of "AddAccount.java" window, here load the table to reflect changes
-//         addGroup.addWindowListener(new WindowAdapter(){
-//           @Override
-//           public void windowClosing(WindowEvent e2)
-//          {
-//            
-//                loadGroupList("");
-//                e2.getWindow().dispose();
-//          }
-//      });
-        
-    addGroup.addWindowListener(new java.awt.event.WindowAdapter() {
-    @Override
-    public void windowClosing(java.awt.event.WindowEvent windowEvent) {
+        addGroup.addWindowListener(new java.awt.event.WindowAdapter() {
+        @Override
+        public void windowClosing(java.awt.event.WindowEvent windowEvent) {
         int row = tblList.getSelectedRow();
         loadAllListTable();
-        tblList.requestFocus();
-        tblList.changeSelection(row,0,false, false);
+//        tblList.requestFocus();
+//        tblList.changeSelection(row,0,false, false);
+        int lastRow = tblList.convertRowIndexToView(tblList.getRowCount() - 1);
+        tblList.setRowSelectionInterval(lastRow, lastRow);
         
     }
 });
@@ -471,14 +525,63 @@ public class MainFrame extends javax.swing.JFrame {
     //Mouse release is nothing but righclick
     private void tblAccountTableMouseReleased(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tblAccountTableMouseReleased
        
+        if(!tblAccountTable.getSelectionModel().isSelectionEmpty()){
         if(evt.isPopupTrigger()){
             jPopupMenu1.show(evt.getComponent(), evt.getX(), evt.getY());
         }
-        
+        }
         
     }//GEN-LAST:event_tblAccountTableMouseReleased
 
     private void deleteAccountRecord(){
+        //DefaultTableModel model = (DefaultTableModel) tblAccountTable.getModel();
+        //selected row from table
+//        if(!isListTableEmpty()){
+        int rowIndex = tblAccountTable.getSelectedRow();
+        String selectedItem = tblAccountTable.getValueAt(rowIndex, 0).toString();
+        
+        //Selected row from listtable
+        int row = tblList.getSelectedRow();
+        String clickedItem = (tblList.getModel().getValueAt(row, 0).toString());
+        
+        String title = tblAccountTable.getValueAt(rowIndex, 0).toString();
+        String username = tblAccountTable.getValueAt(rowIndex, 1).toString();
+        String password = tblAccountTable.getValueAt(rowIndex, 2).toString();
+        String url = tblAccountTable.getValueAt(rowIndex, 3).toString();
+        String groupname = tblAccountTable.getValueAt(rowIndex, 4).toString();  
+        //System.out.println("Before deletion: " + title + "username" + username + "pwd" +password+ "url" +url+ "group" +groupname);
+        
+        int groupID = handler.findGroupID(groupname);
+        int accountID = handler.findAccountId(LoginForm.getID(), groupID, title, username, password, url, groupname);
+       // System.out.println("group id"+ groupID);
+       // System.out.println("account id"+ accountID);
+        
+        if(handler.deleteRecordFromAccount(accountID)){
+            
+            JOptionPane.showMessageDialog(null, "Record delete successfully", "Success", JOptionPane.INFORMATION_MESSAGE);
+            fillAccountTable(clickedItem, "");
+        }
+        else{
+            JOptionPane.showMessageDialog(null, "Record was not deleted", "Failed", JOptionPane.ERROR_MESSAGE);
+        }
+//        }
+        
+    }
+    
+    //perform delete on click on delete popupmenu
+    private void btnDeletePopUpMenuActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnDeletePopUpMenuActionPerformed
+        int input = JOptionPane.showConfirmDialog (null, "Are you sure you wanna delete?","Warning",JOptionPane.YES_NO_OPTION);
+        if(input == JOptionPane.YES_OPTION){
+          deleteAccountRecord(); 
+        }
+        else{
+            return;
+        }      
+    }//GEN-LAST:event_btnDeletePopUpMenuActionPerformed
+
+    
+    private void btnEditPopupMenuActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnEditPopupMenuActionPerformed
+
         DefaultTableModel model = (DefaultTableModel) tblAccountTable.getModel();
         //selected row from table
         int rowIndex = tblAccountTable.getSelectedRow();
@@ -492,31 +595,158 @@ public class MainFrame extends javax.swing.JFrame {
         String username = tblAccountTable.getValueAt(rowIndex, 1).toString();
         String password = tblAccountTable.getValueAt(rowIndex, 2).toString();
         String url = tblAccountTable.getValueAt(rowIndex, 3).toString();
-        String groupname = tblAccountTable.getValueAt(rowIndex, 4).toString();  
-        System.out.println("Before deletion: " + title + "username" + username + "pwd" +password+ "url" +url+ "group" +groupname);
-        
-        
+        String groupname = tblAccountTable.getValueAt(rowIndex, 4).toString(); 
+        System.out.println("From updation Main : " + title + "username" + username + "pwd" +password+ "url" +url+ "group" +groupname);
         int groupID = handler.findGroupID(groupname);
-        int accountID = handler.findAccountId(LoginForm.getID(), groupID, title, username, password, url, groupname);
-        System.out.println("group id"+ groupID);
-        System.out.println("account id"+ accountID);
+        int accID = handler.findAccountId(LoginForm.getID(), groupID , title, username, password, url, groupname);
+        AddAccount popUp = new AddAccount(accID, title, username, password, url, groupname);
         
-        if(handler.deleteRecordFromAccount(accountID)){
+        //AddAccount popUp = new AddAccount();
+        popUp.pack();
+        popUp.setLocationRelativeTo(null);
+        popUp.setVisible(true);
+        popUp.updateWelcomeTitleLabel("Edit Entry");
+        popUp.setbuttonOK("UPDATE"); // to identify it as update operation
+        popUp.updateEntryActionFillPerform();
+        //populateAccountTableForEdit();
+        popUp.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+ 
+        
+        
+        //actions to be performed on closure of "AddAccount.java" window, here load the table to reflect changes
+       popUp.addWindowListener(new WindowAdapter(){
+           @Override
+           public void windowClosing(WindowEvent e)
+          {
+              //if (!groupItemSelected){
+                //loadAllCategories();  
+              //}
+              //else
+              //{
+                String selectedItemFromComboBox = popUp.getSelectedItem(); //Coming from AddAccount.java class
+                int selectedIndexFromComboBox = popUp.getSelectedIndex(); //Coming from AddAccount.java class
+                
+                fillAccountTable(selectedItemFromComboBox, ""); //Refresh table to show the selected value from combobox
+
+                tblList.requestFocus();
+                tblList.changeSelection(selectedIndexFromComboBox,0,false, false);
+                
+                
+              //}   
+                  System.out.println(selectedItemFromComboBox);
+                e.getWindow().dispose();
+          }
+      });
+        
+    }//GEN-LAST:event_btnEditPopupMenuActionPerformed
+    
+    private void deleteGroup(){
+        //DefaultTableModel model = (DefaultTableModel) tblAccountTable.getModel();
+        //selected row from table
+        if(!isListTableEmpty()){
+        int rowIndex = tblList.getSelectedRow();
+        String selectedItem = tblList.getValueAt(rowIndex, 0).toString();
+        
+        //Selected row from listtable
+        int row = tblList.getSelectedRow();
+        String clickedItem = (tblList.getModel().getValueAt(row, 0).toString());
+        
+        String groupname = tblList.getValueAt(rowIndex, 0).toString();
+
+        int groupID = handler.findGroupID(groupname);
+        System.out.println("group id"+ groupID);
+
+        if(handler.deleteGroup(groupID)){
             
-            JOptionPane.showMessageDialog(null, "Record delete successfully", "Success", JOptionPane.INFORMATION_MESSAGE);
+            JOptionPane.showMessageDialog(null, "Group deleted Successfully", "Success", JOptionPane.INFORMATION_MESSAGE);
             fillAccountTable(clickedItem, "");
+            loadAllListTable();
+            tblList.requestFocus();
+            tblList.changeSelection(0,0,false, false);
         }
         else{
-            JOptionPane.showMessageDialog(null, "Record was not deleted", "Failed", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(null, "Group was not deleted", "Failed", JOptionPane.ERROR_MESSAGE);
+        }
         }
         
-    }
-    
-    //perform delete on click on delete popupmenu
-    private void btnDeletePopUpMenuActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnDeletePopUpMenuActionPerformed
+    }   
+   // make popup menu work 
+    private void tblListMouseReleased(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tblListMouseReleased
 
-        deleteAccountRecord();
-    }//GEN-LAST:event_btnDeletePopUpMenuActionPerformed
+         if(!tblList.getSelectionModel().isSelectionEmpty()){
+         if(evt.isPopupTrigger()){
+            jPopupMenu2.show(evt.getComponent(), evt.getX(), evt.getY());
+        }
+         }
+    }//GEN-LAST:event_tblListMouseReleased
+
+    //Perform delete operation
+    private void btnDeleteGroupActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnDeleteGroupActionPerformed
+        int input = JOptionPane.showConfirmDialog (null, "Are you sure you wanna delete?","Warning",JOptionPane.YES_NO_OPTION);
+        if(input == JOptionPane.YES_OPTION){
+          deleteGroup();  
+        }
+        else{
+            return;
+        }
+    }//GEN-LAST:event_btnDeleteGroupActionPerformed
+
+    private void tblListKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_tblListKeyReleased
+        int code=evt.getKeyChar(); 
+        if(code==KeyEvent.VK_DELETE){
+            int input = JOptionPane.showConfirmDialog (null, "Are you sure?","Warning",JOptionPane.YES_NO_OPTION);
+            if(input == JOptionPane.YES_OPTION){
+            deleteGroup();     
+            }  else{
+            return;
+        }
+        } 
+    }//GEN-LAST:event_tblListKeyReleased
+
+    private void tblAccountTableKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_tblAccountTableKeyReleased
+        int code=evt.getKeyChar(); 
+        if(code==KeyEvent.VK_DELETE){
+            int input = JOptionPane.showConfirmDialog (null, "Are you sure?","Warning",JOptionPane.YES_NO_OPTION);
+            if(input == JOptionPane.YES_OPTION){
+            deleteAccountRecord();    
+            }  else{
+            return;
+        }
+        } 
+    }//GEN-LAST:event_tblAccountTableKeyReleased
+
+    private void btnEditGroupActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnEditGroupActionPerformed
+        DefaultTableModel model = (DefaultTableModel) tblAccountTable.getModel();
+        //selected row from table
+        int rowIndex = tblList.getSelectedRow();
+        String selectedItem = tblList.getValueAt(rowIndex, 0).toString();
+        
+        String groupname = tblList.getValueAt(rowIndex, 0).toString(); 
+        int groupID = handler.findGroupID(groupname);
+
+        AddGroup popUp = new AddGroup(groupID, groupname);
+        //AddAccount popUp = new AddAccount();
+        popUp.pack();
+        popUp.setLocationRelativeTo(null);
+        popUp.setVisible(true);
+        popUp.setGroupWelcomeTitle("Edit Entry");
+        popUp.setGroupButton("UPDATE"); // to identify it as update operation
+        popUp.editGroupAction();
+        popUp.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+        
+        //actions to be performed on closure of "AddAccount.java" window, here load the table to reflect changes
+       popUp.addWindowListener(new WindowAdapter(){
+           @Override
+           public void windowClosing(WindowEvent e)
+          {
+                fillListTable("");
+                tblList.requestFocus();
+                tblList.changeSelection(rowIndex,0,false, false);
+  
+                e.getWindow().dispose();
+          }
+      });
+    }//GEN-LAST:event_btnEditGroupActionPerformed
 
     /**
      * @param args the command line arguments
@@ -556,8 +786,12 @@ public class MainFrame extends javax.swing.JFrame {
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnAddEntry;
     private javax.swing.JButton btnAddGroup;
+    private javax.swing.JMenuItem btnDeleteGroup;
     private javax.swing.JMenuItem btnDeletePopUpMenu;
+    private javax.swing.JMenuItem btnEditGroup;
+    private javax.swing.JMenuItem btnEditPopupMenu;
     private javax.swing.JPopupMenu jPopupMenu1;
+    private javax.swing.JPopupMenu jPopupMenu2;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane3;
     private javax.swing.JLabel lblWelcomeMessage;

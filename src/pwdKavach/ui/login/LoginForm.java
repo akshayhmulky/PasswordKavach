@@ -20,7 +20,7 @@ public class LoginForm extends javax.swing.JFrame {
      */
     
     DatabaseHandler handler = null;
-    private static int userID = -1; // privatae because this shouldnt be accessed from Main Frame(for encapuslation)
+    private static int userID = -1; // private because this shouldnt be accessed from Main Frame(for encapuslation)
     
     public LoginForm() {
         handler = DatabaseHandler.getInstance();

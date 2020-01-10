@@ -29,19 +29,32 @@ public class AddAccount extends javax.swing.JFrame {
      */
     
     DatabaseHandler handler = null;
+    private String title;
+    private String username;
+    private String password;
+    private String url;
+    private String groupValue;
+    private int accountID;
     
     public AddAccount() {
         handler = DatabaseHandler.getInstance();
         initComponents();
-        loadComboBox("");   
-        System.out.println(getGroupID());
-//        MainFrame mf = new MainFrame();
-//        String selectedValueFromList = mf.getSelectedValueOfList();
-//        ComboBoxGroup.setSelectedItem(selectedValueFromList);
-//        
+        loadComboBox("");        
     }
     
-
+    //parameterized constructor to pass values from mainframe to updateAccount function
+    public AddAccount(int accountID, String title, String username, String password, String url, String groupValue){
+        this();
+        this.accountID = accountID;
+        this.title = title;
+        this.username = username;
+        this.password = password;
+        this.url = url;
+        this.groupValue = groupValue;
+    }
+    
+    
+    
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -213,7 +226,6 @@ public class AddAccount extends javax.swing.JFrame {
         //ArrayList<String> groups = mff.getGroupListElements();
         DefaultComboBoxModel model = new DefaultComboBoxModel();
         ComboBoxGroup.setModel(model);
-        
       //ResultSet resultSet =  handler.getGroupResultSet(groupname);
         ResultSet resultSet =  handler.getGroupResultSet(groupname);
 
@@ -236,14 +248,14 @@ public class AddAccount extends javax.swing.JFrame {
         } catch (SQLException e) {
             System.out.println("FillComboBox error" + e.getMessage());
         }
-            finally // for elmininating database lock issue
-       {
-            try {
-                resultSet.close();
-                
-            } catch (SQLException e) {
-            }
-        }
+//            finally // for elmininating database lock issue
+//       {
+//            try {
+//                resultSet.close();
+//                
+//            } catch (SQLException e) {
+//            }
+//        }
         
     }
     
@@ -280,6 +292,11 @@ public class AddAccount extends javax.swing.JFrame {
      btnOK.setText(text);
      }
     
+    //Change welcome title label
+    public void updateWelcomeTitleLabel(String welcomeTitleLabel){
+        lblAddEntryTitle.setText(welcomeTitleLabel);
+    }
+    
     //call add entry method
     private void addEntryActionPerform(){
       String title = txtTitle.getText();
@@ -310,14 +327,47 @@ public class AddAccount extends javax.swing.JFrame {
         
     }
     
+    //fill the fields for update
+    public void updateEntryActionFillPerform(){
+        String Updatedtitle = title;
+        String Updatedusername = username;
+        String Updatedpassword = password;
+        String Updatedurl = url;
+        String UpdatedgroupValue = groupValue;
+        txtTitle.setText(Updatedtitle);
+        txtUsername.setText(Updatedusername);
+        txtPassword.setText(Updatedpassword);
+        txtURL.setText(Updatedurl);
+        ComboBoxGroup.setSelectedItem(groupValue);
+    }
+    
     // Add Account button
     private void btnOKActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnOKActionPerformed
         
      if(btnOK.getText().equals("ADD")){
+         //Adding an entry
          addEntryActionPerform();
      }   
-     else{
-         JOptionPane.showMessageDialog(null, "Its not ADD", "",JOptionPane.ERROR_MESSAGE);
+     if(btnOK.getText().equals("UPDATE")){
+            
+        int input = JOptionPane.showConfirmDialog (null, "Are you sure you wanna Save?","Warning",JOptionPane.YES_NO_OPTION);
+        if(input == JOptionPane.YES_OPTION){
+          if(handler.updateAccountTable(accountID, txtTitle.getText(), txtUsername.getText(), String.valueOf(txtPassword.getPassword()), txtURL.getText(), ComboBoxGroup.getSelectedItem().toString()))
+         {
+             JOptionPane.showMessageDialog(null, "Account entry updated successfully", "Success", JOptionPane.INFORMATION_MESSAGE);
+             this.dispatchEvent(new WindowEvent(this, WindowEvent.WINDOW_CLOSING));
+         }
+         else
+         {
+            JOptionPane.showMessageDialog(null, "Account entry was not updated", "Failed", JOptionPane.ERROR_MESSAGE);  
+            this.dispatchEvent(new WindowEvent(this, WindowEvent.WINDOW_CLOSING));
+         } 
+        }
+        else{
+            return;
+        } 
+         
+         
      }
       
     }//GEN-LAST:event_btnOKActionPerformed

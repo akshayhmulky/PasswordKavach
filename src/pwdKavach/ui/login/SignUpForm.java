@@ -68,6 +68,11 @@ public class SignUpForm extends javax.swing.JFrame {
 
         txtLoginLink.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
         txtLoginLink.setText("Already have an account? Login");
+        txtLoginLink.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                txtLoginLinkMouseClicked(evt);
+            }
+        });
 
         lblStar1.setForeground(new java.awt.Color(255, 0, 0));
         lblStar1.setText("*");
@@ -83,9 +88,6 @@ public class SignUpForm extends javax.swing.JFrame {
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addGap(86, 86, 86)
-                .addComponent(lblSignUp))
-            .addGroup(layout.createSequentialGroup()
                 .addGap(36, 36, 36)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.CENTER)
                     .addComponent(txtUsername, javax.swing.GroupLayout.DEFAULT_SIZE, 207, Short.MAX_VALUE)
@@ -97,11 +99,17 @@ public class SignUpForm extends javax.swing.JFrame {
                     .addComponent(lblStar2, javax.swing.GroupLayout.PREFERRED_SIZE, 19, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(lblStar3, javax.swing.GroupLayout.PREFERRED_SIZE, 19, javax.swing.GroupLayout.PREFERRED_SIZE)))
             .addGroup(layout.createSequentialGroup()
-                .addGap(78, 78, 78)
-                .addComponent(btnSignUp))
-            .addGroup(layout.createSequentialGroup()
-                .addGap(25, 25, 25)
-                .addComponent(txtLoginLink))
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(86, 86, 86)
+                        .addComponent(lblSignUp))
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(78, 78, 78)
+                        .addComponent(btnSignUp))
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(25, 25, 25)
+                        .addComponent(txtLoginLink)))
+                .addGap(0, 0, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -159,6 +167,10 @@ public class SignUpForm extends javax.swing.JFrame {
         btnSignUpActionPerformed(null);
     }//GEN-LAST:event_txtPassword1ActionPerformed
 
+    private void txtLoginLinkMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_txtLoginLinkMouseClicked
+        showLoginForm();
+    }//GEN-LAST:event_txtLoginLinkMouseClicked
+
     //onload make all stars invisible
     private void makeStarsInvisible(){
  
@@ -206,8 +218,8 @@ public class SignUpForm extends javax.swing.JFrame {
         loginForm.setVisible(true);
         this.dispose();
     }
-    
-    
+
+
     
     
     

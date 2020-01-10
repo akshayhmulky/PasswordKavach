@@ -21,17 +21,29 @@ public class AddGroup extends javax.swing.JFrame {
      */
     
     DatabaseHandler handler = null; 
+    private String groupname;
+    private int groupID;
+    
     public AddGroup() {
         handler = DatabaseHandler.getInstance();
         initComponents();
         
     }
 
-    //Send text entered in txtGroupName text field
-//    public String textGroupName(){
-//        return txtGroupName.getText();
-//    }
+    public AddGroup(int groupID, String groupname){
+        this();
+        this.groupID = groupID;
+        this.groupname = groupname;
+    }
     
+    //Set button name
+    public void setGroupButton(String gname){
+        btnOK.setText(gname);
+    }
+    
+    public void setGroupWelcomeTitle(String gtitle){
+        lblWelcomeAddGroup.setText(gtitle);
+    }
     
     /**
      * This method is called from within the constructor to initialize the form.
@@ -124,30 +136,66 @@ public class AddGroup extends javax.swing.JFrame {
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-    private void btnOKActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnOKActionPerformed
-      
-      String groupname = txtGroupName.getText();
+//    public String getGroupName(){
+//        String groupname = txtGroupName.getText();
+//        return groupname;
+//    }
+    
+  
+
+    private void addGroupAction(){
+       String groupname = txtGroupName.getText();
       
       if(groupname.isEmpty()){
           JOptionPane.showMessageDialog(null, "Please select group", "", JOptionPane.ERROR_MESSAGE);
           return;  // to close popup window
       }
-        
-      if(handler.insertIntoGroupsTable(LoginForm.getID(), groupname)){
-          
-         // this.dispose(); // dispose add entry window post addition of an item
-          
+      
+      if(handler.insertIntoGroupsTable(LoginForm.getID(), groupname)){          
           JOptionPane.showMessageDialog(null, "Group has been created", "Success", JOptionPane.INFORMATION_MESSAGE);
-          this.dispose();
           this.dispatchEvent(new WindowEvent(this, WindowEvent.WINDOW_CLOSING));
-          
       }
       else
       {
           JOptionPane.showMessageDialog(null, "Cannot Create Duplicate group", "Error", JOptionPane.ERROR_MESSAGE);
-          this.dispose();
           this.dispatchEvent(new WindowEvent(this, WindowEvent.WINDOW_CLOSING));
-      }
+      }  
+        
+    }
+    
+    public void editGroupAction(){  
+        String groupValue = groupname;
+        txtGroupName.setText(groupValue);
+    }
+    
+    private void btnOKActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnOKActionPerformed
+      
+     if(btnOK.getText().equals("ADD")){
+         addGroupAction();
+     }
+     
+     if(btnOK.getText().equals("UPDATE"))
+     {
+          int input = JOptionPane.showConfirmDialog (null, "Are you sure you wanna Save?","Warning",JOptionPane.YES_NO_OPTION);
+          System.out.println("Group Id for update" + groupID);
+        if(input == JOptionPane.YES_OPTION){
+          if(handler.updateGroupTable(groupID, txtGroupName.getText()))
+         {
+             JOptionPane.showMessageDialog(null, "Group Name updated", "Success", JOptionPane.INFORMATION_MESSAGE);
+             this.dispatchEvent(new WindowEvent(this, WindowEvent.WINDOW_CLOSING));
+         }
+         else
+         {
+            JOptionPane.showMessageDialog(null, "Group name was not updated", "Failed", JOptionPane.ERROR_MESSAGE);  
+            this.dispatchEvent(new WindowEvent(this, WindowEvent.WINDOW_CLOSING));
+         } 
+        }
+        else{
+            return;
+        } 
+         
+     }
+       
     }//GEN-LAST:event_btnOKActionPerformed
 
     private void btnCancelActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCancelActionPerformed
