@@ -5,18 +5,22 @@
  */
 package pwdKavach.ui.additem;
 
+import java.awt.Image;
+import java.awt.Toolkit;
+import java.awt.datatransfer.Clipboard;
+import java.awt.datatransfer.StringSelection;
 import java.awt.event.WindowEvent;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import javafx.scene.Parent;
 import javax.swing.DefaultComboBoxModel;
-import javax.swing.JButton;
+import javax.swing.ImageIcon;
 import javax.swing.JOptionPane;
-import javax.swing.table.DefaultTableModel;
 import pwdKavach.database.DatabaseHandler;
 import pwdKavach.main.MainFrame;
+import pwdKavach.security.passwordHashing.EncryptDecrypt;
 import pwdKavach.ui.login.LoginForm;
+import pwdKavach.utility.ToastMessage;
+import pwdKavach.utility.Utility;
 
 /**
  *
@@ -35,13 +39,18 @@ public class AddAccount extends javax.swing.JFrame {
     private String url;
     private String groupValue;
     private int accountID;
+    private boolean showPassword=false;
     
     public AddAccount() {
         handler = DatabaseHandler.getInstance();
         initComponents();
-        loadComboBox("");        
+        loadComboBox("");   
+        showpassword();
+//        showhidePasswordImage.setIcon(new ImageIcon(new javax.swing.ImageIcon(getClass().getResource("/resources/hidePasswordBig.png")).getImage().getScaledInstance(20, 20, Image.SCALE_DEFAULT)));
+        //showhidePasswordImage.setIcon(new ImageIcon(new javax.swing.ImageIcon(getClass().getResource("/resources/hidePasswordSmall.png")).getImage().getScaledInstance(200, 50, Image.SCALE_SMOOTH)));
     }
     
+    //data coming from btnEditPopupMenuActionPerformed()
     //parameterized constructor to pass values from mainframe to updateAccount function
     public AddAccount(int accountID, String title, String username, String password, String url, String groupValue){
         this();
@@ -64,155 +73,216 @@ public class AddAccount extends javax.swing.JFrame {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        lblAddEntryTitle = new javax.swing.JLabel();
-        lblTitle = new javax.swing.JLabel();
+        jPanel1 = new javax.swing.JPanel();
+        btnOK = new javax.swing.JButton();
+        btnCancel = new javax.swing.JButton();
+        ComboBoxGroup = new javax.swing.JComboBox();
+        lblGroup = new javax.swing.JLabel();
+        txtURL = new javax.swing.JTextField();
+        lblURL = new javax.swing.JLabel();
+        lblPassword = new javax.swing.JLabel();
+        btnGeneratePassword = new javax.swing.JButton();
+        btnCopyToClipboard = new javax.swing.JButton();
         txtUsername = new javax.swing.JTextField();
         lblTitle1 = new javax.swing.JLabel();
         txtTitle = new javax.swing.JTextField();
-        txtURL = new javax.swing.JTextField();
-        ComboBoxGroup = new javax.swing.JComboBox();
-        lblPassword = new javax.swing.JLabel();
-        lblPasswordConfirm = new javax.swing.JLabel();
-        lblURL = new javax.swing.JLabel();
-        lblGroup = new javax.swing.JLabel();
-        btnOK = new javax.swing.JButton();
-        btnCancel = new javax.swing.JButton();
-        btnGeneratePassword = new javax.swing.JButton();
-        jButton1 = new javax.swing.JButton();
+        lblTitle = new javax.swing.JLabel();
+        showhidePasswordImage = new javax.swing.JLabel();
+        lblAddEntryTitle = new javax.swing.JLabel();
         txtPassword = new javax.swing.JPasswordField();
-        txtConfirmPassword = new javax.swing.JPasswordField();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        setBackground(new java.awt.Color(153, 153, 255));
+        setResizable(false);
         addWindowListener(new java.awt.event.WindowAdapter() {
             public void windowClosed(java.awt.event.WindowEvent evt) {
                 formWindowClosed(evt);
             }
         });
 
-        lblAddEntryTitle.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
-        lblAddEntryTitle.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        lblAddEntryTitle.setText("Add Entry");
+        jPanel1.setBackground(new java.awt.Color(113, 201, 248));
 
-        lblTitle.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
-        lblTitle.setText("Title:");
-
-        lblTitle1.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
-        lblTitle1.setText("Username:");
-
-        ComboBoxGroup.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
-
-        lblPassword.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
-        lblPassword.setText("Password:");
-
-        lblPasswordConfirm.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
-        lblPasswordConfirm.setText("Repeat:");
-
-        lblURL.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
-        lblURL.setText("URL:");
-
-        lblGroup.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
-        lblGroup.setText("Group:");
-
+        btnOK.setBackground(new java.awt.Color(51, 51, 255));
+        btnOK.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
+        btnOK.setForeground(new java.awt.Color(255, 255, 255));
         btnOK.setText("OK");
+        btnOK.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         btnOK.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnOKActionPerformed(evt);
             }
         });
 
+        btnCancel.setBackground(new java.awt.Color(51, 51, 255));
+        btnCancel.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
+        btnCancel.setForeground(new java.awt.Color(255, 255, 255));
         btnCancel.setText("Cancel");
+        btnCancel.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        btnCancel.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnCancelActionPerformed(evt);
+            }
+        });
 
-        btnGeneratePassword.setFont(new java.awt.Font("Segoe UI Black", 0, 18)); // NOI18N
-        btnGeneratePassword.setText("•••");
+        ComboBoxGroup.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
+        ComboBoxGroup.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+
+        lblGroup.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
+        lblGroup.setText("Group:");
+
+        txtURL.setBorder(javax.swing.BorderFactory.createEmptyBorder(1, 5, 1, 1));
+
+        lblURL.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
+        lblURL.setText("URL:");
+
+        lblPassword.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
+        lblPassword.setText("Password:");
+
+        btnGeneratePassword.setBackground(new java.awt.Color(51, 51, 255));
+        btnGeneratePassword.setFont(new java.awt.Font("Tahoma", 1, 11)); // NOI18N
+        btnGeneratePassword.setForeground(new java.awt.Color(255, 255, 255));
+        btnGeneratePassword.setText("Generate Password");
+        btnGeneratePassword.setToolTipText("Generate Password");
+        btnGeneratePassword.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         btnGeneratePassword.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        btnGeneratePassword.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnGeneratePasswordActionPerformed(evt);
+            }
+        });
 
-        jButton1.setFont(new java.awt.Font("Tahoma", 1, 11)); // NOI18N
-        jButton1.setText("C+V");
+        btnCopyToClipboard.setBackground(new java.awt.Color(51, 51, 255));
+        btnCopyToClipboard.setFont(new java.awt.Font("Tahoma", 1, 11)); // NOI18N
+        btnCopyToClipboard.setForeground(new java.awt.Color(255, 255, 255));
+        btnCopyToClipboard.setText("Copy Password");
+        btnCopyToClipboard.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        btnCopyToClipboard.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnCopyToClipboardActionPerformed(evt);
+            }
+        });
+
+        txtUsername.setBorder(javax.swing.BorderFactory.createEmptyBorder(1, 5, 1, 1));
+
+        lblTitle1.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
+        lblTitle1.setText("Username:");
+
+        txtTitle.setBorder(javax.swing.BorderFactory.createEmptyBorder(1, 5, 1, 1));
+
+        lblTitle.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
+        lblTitle.setText("Title:");
+
+        showhidePasswordImage.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        showhidePasswordImage.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseReleased(java.awt.event.MouseEvent evt) {
+                showhidePasswordImageMouseReleased(evt);
+            }
+        });
+
+        lblAddEntryTitle.setFont(new java.awt.Font("Segoe UI Black", 1, 18)); // NOI18N
+        lblAddEntryTitle.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        lblAddEntryTitle.setText("Add Entry");
+
+        txtPassword.setBorder(javax.swing.BorderFactory.createEmptyBorder(1, 5, 1, 1));
+
+        javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
+        jPanel1.setLayout(jPanel1Layout);
+        jPanel1Layout.setHorizontalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addComponent(lblTitle1)
+                            .addComponent(lblTitle)
+                            .addComponent(lblPassword))
+                        .addGap(18, 18, 18)
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addComponent(txtUsername, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 206, Short.MAX_VALUE)
+                            .addComponent(txtTitle, javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addComponent(txtPassword)))
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addComponent(lblURL)
+                            .addComponent(lblGroup))
+                        .addGap(18, 18, 18)
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addComponent(ComboBoxGroup, javax.swing.GroupLayout.PREFERRED_SIZE, 206, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(txtURL, javax.swing.GroupLayout.PREFERRED_SIZE, 206, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addGroup(jPanel1Layout.createSequentialGroup()
+                                .addComponent(btnOK, javax.swing.GroupLayout.PREFERRED_SIZE, 83, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addComponent(btnCancel, javax.swing.GroupLayout.PREFERRED_SIZE, 83, javax.swing.GroupLayout.PREFERRED_SIZE)))))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(showhidePasswordImage, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(btnGeneratePassword, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(btnCopyToClipboard, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addGap(55, 55, 55))
+            .addGroup(jPanel1Layout.createSequentialGroup()
+                .addGap(69, 69, 69)
+                .addComponent(lblAddEntryTitle, javax.swing.GroupLayout.PREFERRED_SIZE, 249, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+
+        jPanel1Layout.linkSize(javax.swing.SwingConstants.HORIZONTAL, new java.awt.Component[] {txtPassword, txtTitle, txtURL, txtUsername});
+
+        jPanel1Layout.setVerticalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
+                .addGap(12, 12, 12)
+                .addComponent(lblAddEntryTitle)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(txtTitle, javax.swing.GroupLayout.PREFERRED_SIZE, 36, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(lblTitle))
+                .addGap(18, 18, 18)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(txtUsername, javax.swing.GroupLayout.PREFERRED_SIZE, 36, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(lblTitle1))
+                .addGap(18, 18, 18)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                .addComponent(txtPassword, javax.swing.GroupLayout.PREFERRED_SIZE, 33, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addComponent(lblPassword))
+                            .addComponent(showhidePasswordImage, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGap(18, 18, 18)
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(txtURL, javax.swing.GroupLayout.PREFERRED_SIZE, 36, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(lblURL))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(ComboBoxGroup)
+                            .addComponent(lblGroup))
+                        .addGap(20, 20, 20)
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(btnOK, javax.swing.GroupLayout.PREFERRED_SIZE, 38, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(btnCancel, javax.swing.GroupLayout.PREFERRED_SIZE, 38, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGap(20, 20, 20))
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addComponent(btnGeneratePassword)
+                        .addGap(1, 1, 1)
+                        .addComponent(btnCopyToClipboard)
+                        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
+        );
+
+        jPanel1Layout.linkSize(javax.swing.SwingConstants.VERTICAL, new java.awt.Component[] {btnCopyToClipboard, btnGeneratePassword});
+
+        jPanel1Layout.linkSize(javax.swing.SwingConstants.VERTICAL, new java.awt.Component[] {txtPassword, txtTitle, txtURL, txtUsername});
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(layout.createSequentialGroup()
-                        .addGap(47, 47, 47)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(lblAddEntryTitle, javax.swing.GroupLayout.PREFERRED_SIZE, 271, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addGroup(layout.createSequentialGroup()
-                                .addComponent(lblTitle)
-                                .addGap(18, 18, 18)
-                                .addComponent(txtTitle, javax.swing.GroupLayout.PREFERRED_SIZE, 206, javax.swing.GroupLayout.PREFERRED_SIZE))))
-                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                        .addGroup(layout.createSequentialGroup()
-                            .addGap(0, 0, Short.MAX_VALUE)
-                            .addComponent(btnOK, javax.swing.GroupLayout.PREFERRED_SIZE, 83, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addGap(26, 26, 26)
-                            .addComponent(btnCancel, javax.swing.GroupLayout.PREFERRED_SIZE, 83, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createSequentialGroup()
-                            .addContainerGap()
-                            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                                .addGroup(layout.createSequentialGroup()
-                                    .addComponent(lblPassword)
-                                    .addGap(18, 18, 18)
-                                    .addComponent(txtPassword, javax.swing.GroupLayout.PREFERRED_SIZE, 206, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                .addGroup(layout.createSequentialGroup()
-                                    .addComponent(lblTitle1)
-                                    .addGap(18, 18, 18)
-                                    .addComponent(txtUsername, javax.swing.GroupLayout.PREFERRED_SIZE, 206, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                .addGroup(layout.createSequentialGroup()
-                                    .addComponent(lblPasswordConfirm)
-                                    .addGap(18, 18, 18)
-                                    .addComponent(txtConfirmPassword, javax.swing.GroupLayout.PREFERRED_SIZE, 206, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                .addGroup(layout.createSequentialGroup()
-                                    .addComponent(lblURL)
-                                    .addGap(18, 18, 18)
-                                    .addComponent(txtURL, javax.swing.GroupLayout.PREFERRED_SIZE, 206, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                .addGroup(layout.createSequentialGroup()
-                                    .addComponent(lblGroup)
-                                    .addGap(18, 18, 18)
-                                    .addComponent(ComboBoxGroup, javax.swing.GroupLayout.PREFERRED_SIZE, 206, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                            .addGap(18, 18, 18)
-                            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                .addComponent(btnGeneratePassword)
-                                .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 57, javax.swing.GroupLayout.PREFERRED_SIZE)))))
-                .addContainerGap(24, Short.MAX_VALUE))
+            .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, 494, javax.swing.GroupLayout.PREFERRED_SIZE)
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
-                .addComponent(lblAddEntryTitle)
-                .addGap(25, 25, 25)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(lblTitle)
-                    .addComponent(txtTitle, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(18, 18, 18)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(lblTitle1)
-                    .addComponent(txtUsername, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(18, 18, 18)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(lblPassword)
-                    .addComponent(btnGeneratePassword)
-                    .addComponent(txtPassword, javax.swing.GroupLayout.PREFERRED_SIZE, 36, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(18, 18, 18)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(lblPasswordConfirm)
-                    .addComponent(jButton1)
-                    .addComponent(txtConfirmPassword, javax.swing.GroupLayout.PREFERRED_SIZE, 36, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(18, 18, 18)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(txtURL, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(lblURL))
-                .addGap(18, 18, 18)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(ComboBoxGroup, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(lblGroup))
-                .addGap(18, 18, 18)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(btnOK, javax.swing.GroupLayout.PREFERRED_SIZE, 38, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(btnCancel, javax.swing.GroupLayout.PREFERRED_SIZE, 38, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(22, Short.MAX_VALUE))
+            .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
 
         pack();
@@ -258,9 +328,23 @@ public class AddAccount extends javax.swing.JFrame {
 //        }
         
     }
-    
-   
-    
+  
+ //show and hide password  
+  public void showpassword(){
+      
+    if (showPassword == false) {
+           showPassword = true;
+           showhidePasswordImage.setIcon(new ImageIcon(new javax.swing.ImageIcon(getClass().getResource("/resources/closedLock.png")).getImage().getScaledInstance(32, 32, Image.SCALE_DEFAULT)));
+           txtPassword.setEchoChar('\u26AB');
+        }
+        else if(showPassword == true) {
+           showPassword = false;
+           showhidePasswordImage.setIcon(new ImageIcon(new javax.swing.ImageIcon(getClass().getResource("/resources/openLock.png")).getImage().getScaledInstance(32, 32, Image.SCALE_DEFAULT)));
+           txtPassword.setEchoChar((char)0);
+  }
+  }    
+ 
+ 
     //Pass SelectedItem to MainFrame for assigning table value post close of this add form
    //Enter btnOKActionPerformed for guessing combox default value
     public String getSelectedItem() {
@@ -301,7 +385,7 @@ public class AddAccount extends javax.swing.JFrame {
     private void addEntryActionPerform(){
       String title = txtTitle.getText();
       String username = txtUsername.getText();
-      String password = String.valueOf(txtPassword.getPassword());
+      String password = EncryptDecrypt.encryptAccountPassword(String.valueOf(txtPassword.getPassword())); //Encrypt password
       String url = txtURL.getText();
       String groupValue = ComboBoxGroup.getSelectedItem().toString();
       
@@ -311,6 +395,7 @@ public class AddAccount extends javax.swing.JFrame {
           return;  // to close popup window
       }
         
+      
       if(handler.insertIntoAccountsTable(LoginForm.getID(), getGroupID(), title, username, password, url, groupValue)){
           
           //this.dispose(); // dispose add entry window post addition of an item
@@ -332,6 +417,7 @@ public class AddAccount extends javax.swing.JFrame {
         String Updatedtitle = title;
         String Updatedusername = username;
         String Updatedpassword = password;
+        System.out.println("Password inside updation to be done block" + Updatedpassword);
         String Updatedurl = url;
         String UpdatedgroupValue = groupValue;
         txtTitle.setText(Updatedtitle);
@@ -352,7 +438,7 @@ public class AddAccount extends javax.swing.JFrame {
             
         int input = JOptionPane.showConfirmDialog (null, "Are you sure you wanna Save?","Warning",JOptionPane.YES_NO_OPTION);
         if(input == JOptionPane.YES_OPTION){
-          if(handler.updateAccountTable(accountID, txtTitle.getText(), txtUsername.getText(), String.valueOf(txtPassword.getPassword()), txtURL.getText(), ComboBoxGroup.getSelectedItem().toString()))
+          if(handler.updateAccountTable(accountID, txtTitle.getText(), txtUsername.getText(), EncryptDecrypt.encryptAccountPassword(String.valueOf(txtPassword.getPassword())), txtURL.getText(), ComboBoxGroup.getSelectedItem().toString()))
          {
              JOptionPane.showMessageDialog(null, "Account entry updated successfully", "Success", JOptionPane.INFORMATION_MESSAGE);
              this.dispatchEvent(new WindowEvent(this, WindowEvent.WINDOW_CLOSING));
@@ -376,6 +462,32 @@ public class AddAccount extends javax.swing.JFrame {
         //this.setEnabled(true);
         
     }//GEN-LAST:event_formWindowClosed
+
+    //Generate password on click
+    private void btnGeneratePasswordActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnGeneratePasswordActionPerformed
+        txtPassword.setText(Utility.generatePassword());
+        
+    }//GEN-LAST:event_btnGeneratePasswordActionPerformed
+
+    private void showhidePasswordImageMouseReleased(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_showhidePasswordImageMouseReleased
+    showpassword();
+    }//GEN-LAST:event_showhidePasswordImageMouseReleased
+
+    private void btnCopyToClipboardActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCopyToClipboardActionPerformed
+     String myString = String.valueOf(txtPassword.getPassword());
+     StringSelection stringSelection = new StringSelection (myString);
+     Clipboard clpbrd = Toolkit.getDefaultToolkit().getSystemClipboard ();
+     clpbrd.setContents (stringSelection, null);
+     
+     //display copied message in the middle of the screen
+     ToastMessage t; 
+     t = new ToastMessage("Password is copied"); 
+     t.showtoast(); 
+    }//GEN-LAST:event_btnCopyToClipboardActionPerformed
+
+    private void btnCancelActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCancelActionPerformed
+        this.dispose();
+    }//GEN-LAST:event_btnCancelActionPerformed
 
     /**
      * @param args the command line arguments
@@ -415,17 +527,17 @@ public class AddAccount extends javax.swing.JFrame {
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JComboBox ComboBoxGroup;
     private javax.swing.JButton btnCancel;
+    private javax.swing.JButton btnCopyToClipboard;
     private javax.swing.JButton btnGeneratePassword;
     private javax.swing.JButton btnOK;
-    private javax.swing.JButton jButton1;
+    private javax.swing.JPanel jPanel1;
     private javax.swing.JLabel lblAddEntryTitle;
     private javax.swing.JLabel lblGroup;
     private javax.swing.JLabel lblPassword;
-    private javax.swing.JLabel lblPasswordConfirm;
     private javax.swing.JLabel lblTitle;
     private javax.swing.JLabel lblTitle1;
     private javax.swing.JLabel lblURL;
-    private javax.swing.JPasswordField txtConfirmPassword;
+    private javax.swing.JLabel showhidePasswordImage;
     private javax.swing.JPasswordField txtPassword;
     private javax.swing.JTextField txtTitle;
     private javax.swing.JTextField txtURL;

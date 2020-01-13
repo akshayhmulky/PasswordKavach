@@ -59,7 +59,7 @@ public class DatabaseHandler {
     
     
     //INSERT USERS (FOR SIGNUP FORM)
-    public boolean insertUser(String username, String password)
+    public boolean insertUser(String username, String password, String salt)
     {
         
         PreparedStatement preparedStatement = null; // Preparedstatement protect from SQL injections
@@ -78,11 +78,12 @@ public class DatabaseHandler {
                    return false;
                }
               
-              String insertQuery = "INSERT INTO USERS(username, password) VALUES(?, ?)";
+              String insertQuery = "INSERT INTO USERS(username, password, salt) VALUES(?, ?, ?)";
               preparedStatement = conn.prepareStatement(insertQuery);
               preparedStatement.setString(1, username); // required for Insert query
               preparedStatement.setString(2, password);// required for Insert query
-               
+              preparedStatement.setString(3, salt);// required for Insert query 
+              
               int result = preparedStatement.executeUpdate(); //incase of insert, update , delete use executeUpdate, returns 1 or 0
               return (result == 1);
            }  //endif
@@ -95,6 +96,33 @@ public class DatabaseHandler {
         
     }
     
+   public String findSalt(String username){
+       
+       String salt = null;
+       
+       String query = "SELECT salt FROM users WHERE username = ?";
+       
+        PreparedStatement preparedStatement = null;
+        ResultSet resultSet = null;
+        
+        try {
+            
+            preparedStatement = conn.prepareStatement(query);
+            preparedStatement.setString(1, username);
+            resultSet = preparedStatement.executeQuery();
+            
+            if(resultSet.next()){
+                
+              salt = resultSet.getString(1); //Returns first paramenter value from select query (i.e id), which we can use to specify to check logged in user in Main window
+            }
+            
+        } catch (SQLException e) {
+            System.out.println("Find Salt error" +e.getMessage());
+        }
+
+        return salt;
+       
+   } 
     
     //Return id of user loggedin in case of succes login, or return -1
     //Check credentials for Login Form
@@ -133,8 +161,7 @@ public class DatabaseHandler {
         
         return -1;
     }
-    
-    
+     
    //get username of loggedin user 
     public String getUsername(int id)
     {
@@ -169,7 +196,6 @@ public class DatabaseHandler {
         return username; // Since contains return type as String in ( public String)
         
     }
-    
     
     //Can be used to Select group-->display table data  OR in Search OR load data table
     public ResultSet getAccountResultSet(String group, String name)
@@ -245,7 +271,6 @@ public class DatabaseHandler {
         
         return rs;
     }
-    
     
     //Insert into Accounts table
     public boolean insertIntoAccountsTable(int idUser, int idGroup, String title, String username, String password, String url, String group)
@@ -374,8 +399,7 @@ public class DatabaseHandler {
        return rs;
 //        
     }     
-       
-  
+     
     //find group id
     public int findGroupID(String groupname){
         

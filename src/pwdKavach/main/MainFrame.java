@@ -5,6 +5,10 @@
  */
 package pwdKavach.main;
 
+import java.awt.Color;
+import java.awt.Toolkit;
+import java.awt.datatransfer.Clipboard;
+import java.awt.datatransfer.StringSelection;
 import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
@@ -12,16 +16,21 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import javax.swing.DefaultListModel;
+import javax.swing.JButton;
 import javax.swing.JOptionPane;
 import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
+import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.JTableHeader;
 import pwdKavach.database.DatabaseHandler;
+import pwdKavach.security.passwordHashing.EncryptDecrypt;
 import pwdKavach.ui.addgroup.AddGroup;
 import pwdKavach.ui.additem.AddAccount;
 import pwdKavach.ui.login.LoginForm;
+import pwdKavach.utility.ToastMessage;
 
 
 /**
@@ -48,6 +57,7 @@ public class MainFrame extends javax.swing.JFrame {
             loadAllCategories();
             loadAllListTable();
             TableListSelection();
+            searchLostFocus();
             tblList.requestFocus();
             tblList.changeSelection(0,0,false, false);
        }
@@ -62,23 +72,15 @@ public class MainFrame extends javax.swing.JFrame {
         //tblList.changeSelection(0,0,false, false);
         //listGroup.setSelectedValue("Banking", true);
     }
-
-//    //Sending list item to AddAccount (comboBox)
-//    public ArrayList<String> getGroupListElements(){
-//        ArrayList<String> listGroupToBeSent = new ArrayList<>();
-//        for(int i=0; i< listGroup.getModel().getSize();i++){
-//            if(!(listGroup.getModel().getElementAt(i).toString().equals("All"))) // add all except "All"
-//            listGroupToBeSent.add(listGroup.getModel().getElementAt(i).toString());
-//        }
-//        return listGroupToBeSent;   
-//    }
   
+   // allow listtableselection only when list is not empty
     public boolean isListTableEmpty() {
         if (tblList != null && tblList.getModel() != null) {
             return tblList.getModel().getRowCount()<=0?true:false;
         }
         return false;
     }
+    
     
     public boolean isAccountTableEmpty() {
         if (tblAccountTable != null && tblAccountTable.getModel() != null) {
@@ -101,6 +103,7 @@ public class MainFrame extends javax.swing.JFrame {
     DefaultTableModel tableModel = new DefaultTableModel();
      
     tableModel.setColumnIdentifiers(columnNames);
+    //tblAccountTable.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
 //    tblAccountTable.setEnabled(false); // NEED TO CHECK
         
     ResultSet resultSet =  handler.getAccountResultSet(groupname, accountName);
@@ -129,11 +132,12 @@ public class MainFrame extends javax.swing.JFrame {
                 
                 row[0] = title;
                 row[1] = username;
-                row[2] = password;  
+                row[2] = EncryptDecrypt.decryptAccountPassword(password);             
                 row[3] = url;
                 row[4] = groupName;
                 
                 tableModel.addRow(row);
+                
                 
                 
             }
@@ -142,7 +146,8 @@ public class MainFrame extends javax.swing.JFrame {
             System.out.println("FillAccountTable error" + e.getMessage());
         }
         
-       tblAccountTable.setDefaultEditor(Object.class, null); //Disable editing option
+        //Making table cell uneditable
+        tblAccountTable.setDefaultEditor(Object.class, null); //Disable editing option
         tblAccountTable.setModel(tableModel);
         //tableModel.fireTableDataChanged();
         
@@ -157,7 +162,11 @@ public class MainFrame extends javax.swing.JFrame {
     String columnNames[] = {"Group"}; //Set table names
     
     DefaultTableModel tableModel = new DefaultTableModel();    
-    tableModel.setColumnIdentifiers(columnNames);       
+    tableModel.setColumnIdentifiers(columnNames); 
+    
+//    tblList.getTableHeader().setOpaque(false);
+//    tblList.getTableHeader().setBackground(Color.red);
+
     ResultSet resultSet =  handler.getGroupResultSet(groupname);
     if(resultSet == null)
     {
@@ -194,7 +203,6 @@ public class MainFrame extends javax.swing.JFrame {
         //}
     }
     
-    
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -207,17 +215,24 @@ public class MainFrame extends javax.swing.JFrame {
         jPopupMenu1 = new javax.swing.JPopupMenu();
         btnDeletePopUpMenu = new javax.swing.JMenuItem();
         btnEditPopupMenu = new javax.swing.JMenuItem();
+        btnCopyPassword = new javax.swing.JMenuItem();
+        btnCopyUsername = new javax.swing.JMenuItem();
+        btnCopyURL = new javax.swing.JMenuItem();
         jPopupMenu2 = new javax.swing.JPopupMenu();
         btnDeleteGroup = new javax.swing.JMenuItem();
         btnEditGroup = new javax.swing.JMenuItem();
-        lblWelcomeMessage = new javax.swing.JLabel();
-        jScrollPane1 = new javax.swing.JScrollPane();
-        tblAccountTable = new javax.swing.JTable();
-        btnAddEntry = new javax.swing.JButton();
-        btnAddGroup = new javax.swing.JButton();
-        test = new javax.swing.JButton();
+        jPanel1 = new javax.swing.JPanel();
         jScrollPane3 = new javax.swing.JScrollPane();
         tblList = new javax.swing.JTable();
+        jScrollPane1 = new javax.swing.JScrollPane();
+        tblAccountTable = new javax.swing.JTable();
+        btnAddGroup = new javax.swing.JButton();
+        btnAddEntry = new javax.swing.JButton();
+        btnLogout = new javax.swing.JButton();
+        lblWelcomeMessage = new javax.swing.JLabel();
+        txtSearchBox = new javax.swing.JTextField();
+        lblSearchButton = new javax.swing.JLabel();
+        lblLogin = new javax.swing.JLabel();
 
         btnDeletePopUpMenu.setText("Delete");
         btnDeletePopUpMenu.addActionListener(new java.awt.event.ActionListener() {
@@ -234,6 +249,30 @@ public class MainFrame extends javax.swing.JFrame {
             }
         });
         jPopupMenu1.add(btnEditPopupMenu);
+
+        btnCopyPassword.setText("Copy Password");
+        btnCopyPassword.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnCopyPasswordActionPerformed(evt);
+            }
+        });
+        jPopupMenu1.add(btnCopyPassword);
+
+        btnCopyUsername.setText("Copy Username");
+        btnCopyUsername.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnCopyUsernameActionPerformed(evt);
+            }
+        });
+        jPopupMenu1.add(btnCopyUsername);
+
+        btnCopyURL.setText("Copy URL");
+        btnCopyURL.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnCopyURLActionPerformed(evt);
+            }
+        });
+        jPopupMenu1.add(btnCopyURL);
 
         btnDeleteGroup.setText("Delete");
         btnDeleteGroup.addActionListener(new java.awt.event.ActionListener() {
@@ -252,54 +291,9 @@ public class MainFrame extends javax.swing.JFrame {
         jPopupMenu2.add(btnEditGroup);
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        setBackground(new java.awt.Color(105, 233, 251));
 
-        lblWelcomeMessage.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
-        lblWelcomeMessage.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        lblWelcomeMessage.setText("Hello, Username");
-
-        tblAccountTable.setModel(new javax.swing.table.DefaultTableModel(
-            new Object [][] {
-                {null, null, null, null},
-                {null, null, null, null},
-                {null, null, null, null},
-                {null, null, null, null}
-            },
-            new String [] {
-                "Title 1", "Title 2", "Title 3", "Title 4"
-            }
-        ));
-        tblAccountTable.addMouseListener(new java.awt.event.MouseAdapter() {
-            public void mouseReleased(java.awt.event.MouseEvent evt) {
-                tblAccountTableMouseReleased(evt);
-            }
-        });
-        tblAccountTable.addKeyListener(new java.awt.event.KeyAdapter() {
-            public void keyReleased(java.awt.event.KeyEvent evt) {
-                tblAccountTableKeyReleased(evt);
-            }
-        });
-        jScrollPane1.setViewportView(tblAccountTable);
-
-        btnAddEntry.setText("Add Entry");
-        btnAddEntry.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnAddEntryActionPerformed(evt);
-            }
-        });
-
-        btnAddGroup.setText("Add Group");
-        btnAddGroup.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnAddGroupActionPerformed(evt);
-            }
-        });
-
-        test.setText("jButton1");
-        test.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                testActionPerformed(evt);
-            }
-        });
+        jPanel1.setBackground(new java.awt.Color(113, 201, 248));
 
         tblList.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
@@ -320,7 +314,7 @@ public class MainFrame extends javax.swing.JFrame {
                 return canEdit [columnIndex];
             }
         });
-        tblList.setGridColor(new java.awt.Color(204, 255, 255));
+        tblList.setGridColor(new java.awt.Color(255, 255, 255));
         tblList.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 tblListMouseClicked(evt);
@@ -339,44 +333,160 @@ public class MainFrame extends javax.swing.JFrame {
         });
         jScrollPane3.setViewportView(tblList);
 
+        tblAccountTable.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
+                {null, null, null, null},
+                {null, null, null, null},
+                {null, null, null, null},
+                {null, null, null, null}
+            },
+            new String [] {
+                "Title 1", "Title 2", "Title 3", "Title 4"
+            }
+        ));
+        tblAccountTable.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                tblAccountTableMouseClicked(evt);
+            }
+            public void mouseReleased(java.awt.event.MouseEvent evt) {
+                tblAccountTableMouseReleased(evt);
+            }
+        });
+        tblAccountTable.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyReleased(java.awt.event.KeyEvent evt) {
+                tblAccountTableKeyReleased(evt);
+            }
+        });
+        jScrollPane1.setViewportView(tblAccountTable);
+
+        btnAddGroup.setBackground(new java.awt.Color(51, 51, 255));
+        btnAddGroup.setFont(new java.awt.Font("Tahoma", 1, 11)); // NOI18N
+        btnAddGroup.setForeground(new java.awt.Color(255, 255, 255));
+        btnAddGroup.setText("Add Group");
+        btnAddGroup.setBorder(null);
+        btnAddGroup.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnAddGroupActionPerformed(evt);
+            }
+        });
+
+        btnAddEntry.setBackground(new java.awt.Color(51, 51, 255));
+        btnAddEntry.setFont(new java.awt.Font("Tahoma", 1, 11)); // NOI18N
+        btnAddEntry.setForeground(new java.awt.Color(255, 255, 255));
+        btnAddEntry.setText("Add Entry");
+        btnAddEntry.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnAddEntryActionPerformed(evt);
+            }
+        });
+
+        btnLogout.setBackground(new java.awt.Color(51, 51, 255));
+        btnLogout.setFont(new java.awt.Font("Tahoma", 1, 11)); // NOI18N
+        btnLogout.setForeground(new java.awt.Color(255, 255, 255));
+        btnLogout.setText("Logout");
+        btnLogout.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnLogoutActionPerformed(evt);
+            }
+        });
+
+        lblWelcomeMessage.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
+        lblWelcomeMessage.setForeground(new java.awt.Color(255, 255, 255));
+        lblWelcomeMessage.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        lblWelcomeMessage.setText("Hello, Username");
+
+        txtSearchBox.setBorder(javax.swing.BorderFactory.createEmptyBorder(1, 5, 1, 1));
+        txtSearchBox.addFocusListener(new java.awt.event.FocusAdapter() {
+            public void focusGained(java.awt.event.FocusEvent evt) {
+                txtSearchBoxFocusGained(evt);
+            }
+            public void focusLost(java.awt.event.FocusEvent evt) {
+                txtSearchBoxFocusLost(evt);
+            }
+        });
+        txtSearchBox.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                txtSearchBoxActionPerformed(evt);
+            }
+        });
+
+        lblSearchButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/resources/searchButton.png"))); // NOI18N
+        lblSearchButton.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseReleased(java.awt.event.MouseEvent evt) {
+                lblSearchButtonMouseReleased(evt);
+            }
+        });
+
+        lblLogin.setFont(new java.awt.Font("Showcard Gothic", 0, 18)); // NOI18N
+        lblLogin.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        lblLogin.setText("Password KavAch");
+
+        javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
+        jPanel1.setLayout(jPanel1Layout);
+        jPanel1Layout.setHorizontalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel1Layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 108, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(30, 30, 30)
+                        .addComponent(jScrollPane1))
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addComponent(btnAddGroup, javax.swing.GroupLayout.PREFERRED_SIZE, 76, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(btnAddEntry)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(btnLogout)))
+                .addGap(26, 26, 26))
+            .addGroup(jPanel1Layout.createSequentialGroup()
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addGap(236, 236, 236)
+                        .addComponent(txtSearchBox, javax.swing.GroupLayout.PREFERRED_SIZE, 183, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(lblSearchButton, javax.swing.GroupLayout.PREFERRED_SIZE, 24, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addContainerGap()
+                        .addComponent(lblLogin)))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(lblWelcomeMessage, javax.swing.GroupLayout.PREFERRED_SIZE, 140, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap())
+        );
+
+        jPanel1Layout.linkSize(javax.swing.SwingConstants.HORIZONTAL, new java.awt.Component[] {btnAddEntry, btnAddGroup, btnLogout});
+
+        jPanel1Layout.setVerticalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel1Layout.createSequentialGroup()
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(lblWelcomeMessage)
+                    .addComponent(lblLogin))
+                .addGap(11, 11, 11)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(btnAddEntry)
+                    .addComponent(btnLogout)
+                    .addComponent(btnAddGroup, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(txtSearchBox, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(lblSearchButton, javax.swing.GroupLayout.PREFERRED_SIZE, 24, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(11, 11, 11)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jScrollPane3, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 116, Short.MAX_VALUE)
+                    .addComponent(jScrollPane1, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE))
+                .addGap(20, 20, 20))
+        );
+
+        jPanel1Layout.linkSize(javax.swing.SwingConstants.VERTICAL, new java.awt.Component[] {btnAddEntry, btnAddGroup, btnLogout});
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
-                .addComponent(btnAddGroup)
-                .addGap(18, 18, 18)
-                .addComponent(btnAddEntry)
-                .addGap(43, 43, 43)
-                .addComponent(lblWelcomeMessage, javax.swing.GroupLayout.PREFERRED_SIZE, 140, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addComponent(test)
-                .addGap(84, 84, 84))
-            .addGroup(layout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 108, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 36, Short.MAX_VALUE)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(20, 20, 20))
+            .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                        .addComponent(lblWelcomeMessage)
-                        .addGroup(layout.createSequentialGroup()
-                            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                                .addComponent(btnAddEntry, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                .addComponent(btnAddGroup, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                            .addGap(2, 2, 2)))
-                    .addComponent(test))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 142, Short.MAX_VALUE)
-                    .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+            .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
 
         pack();
@@ -390,7 +500,9 @@ public class MainFrame extends javax.swing.JFrame {
         addAccount.setLocationRelativeTo(null);
         addAccount.setVisible(true);
         addAccount.setbuttonOK("ADD");
-        //this.setEnabled(false);
+        //addAccount.setAlwaysOnTop(true);
+        this.setEnabled(false);
+
         //String selectedItemFromList = (String) listGroup.getSelectedValue();
         int column = 0;
         int row = tblList.getSelectedRow();
@@ -404,6 +516,7 @@ public class MainFrame extends javax.swing.JFrame {
      
         //actions to be performed on closure of "AddAccount.java" window, here load the table to reflect changes
        addAccount.addWindowListener(new WindowAdapter(){
+
            @Override
            public void windowClosing(WindowEvent e)
           {
@@ -412,22 +525,26 @@ public class MainFrame extends javax.swing.JFrame {
               //}
               //else
               //{
+                MainFrame.this.setEnabled(true);
                 String selectedItemFromComboBox = addAccount.getSelectedItem(); //Coming from AddAccount.java class
                 int selectedIndexFromComboBox = addAccount.getSelectedIndex(); //Coming from AddAccount.java class
                 
                 fillAccountTable(selectedItemFromComboBox, ""); //Refresh table to show the selected value from combobox
-
+                
                 tblList.requestFocus();
                 tblList.changeSelection(selectedIndexFromComboBox,0,false, false);
+                
                 //IF NEED TO SELECT LAST ELEMENAT OF A ACCOUNT TABLE THEN CAN USE THIS
 //                int lastRow = tblAccountTable.convertRowIndexToView(tblAccountTable.getRowCount() - 1);
 //                tblAccountTable.setRowSelectionInterval(lastRow, lastRow);
                 
-                
+                  
               //}   
                   System.out.println(selectedItemFromComboBox);
-                e.getWindow().dispose();
+                  e.getWindow().dispose();
+                
           }
+           
       });
        
     }//GEN-LAST:event_btnAddEntryActionPerformed
@@ -488,9 +605,15 @@ public class MainFrame extends javax.swing.JFrame {
         
     }//GEN-LAST:event_btnAddGroupActionPerformed
 
-    private void testActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_testActionPerformed
- 
-    }//GEN-LAST:event_testActionPerformed
+   //Logout testing
+    private void btnLogoutActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnLogoutActionPerformed
+
+        LoginForm lf = new LoginForm();
+        lf.pack();
+        lf.setLocationRelativeTo(null);
+        lf.setVisible(true);
+        this.dispose();
+    }//GEN-LAST:event_btnLogoutActionPerformed
 
     private void tblListMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tblListMouseClicked
        
@@ -520,8 +643,7 @@ public class MainFrame extends javax.swing.JFrame {
 //        fillAccountTable(clickedItem, "");   
 //      }
     }//GEN-LAST:event_tblListKeyPressed
-
-    
+   
     //Mouse release is nothing but righclick
     private void tblAccountTableMouseReleased(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tblAccountTableMouseReleased
        
@@ -546,7 +668,8 @@ public class MainFrame extends javax.swing.JFrame {
         
         String title = tblAccountTable.getValueAt(rowIndex, 0).toString();
         String username = tblAccountTable.getValueAt(rowIndex, 1).toString();
-        String password = tblAccountTable.getValueAt(rowIndex, 2).toString();
+        //Decrypting so that password in ecnrypted form can be search in database for deletion
+        String password = EncryptDecrypt.encryptAccountPassword(tblAccountTable.getValueAt(rowIndex, 2).toString());
         String url = tblAccountTable.getValueAt(rowIndex, 3).toString();
         String groupname = tblAccountTable.getValueAt(rowIndex, 4).toString();  
         //System.out.println("Before deletion: " + title + "username" + username + "pwd" +password+ "url" +url+ "group" +groupname);
@@ -558,7 +681,7 @@ public class MainFrame extends javax.swing.JFrame {
         
         if(handler.deleteRecordFromAccount(accountID)){
             
-            JOptionPane.showMessageDialog(null, "Record delete successfully", "Success", JOptionPane.INFORMATION_MESSAGE);
+            //JOptionPane.showMessageDialog(null, "Record delete successfully", "Success", JOptionPane.INFORMATION_MESSAGE);
             fillAccountTable(clickedItem, "");
         }
         else{
@@ -593,7 +716,7 @@ public class MainFrame extends javax.swing.JFrame {
         
         String title = tblAccountTable.getValueAt(rowIndex, 0).toString();
         String username = tblAccountTable.getValueAt(rowIndex, 1).toString();
-        String password = tblAccountTable.getValueAt(rowIndex, 2).toString();
+        String password = tblAccountTable.getValueAt(rowIndex, 2).toString(); //Decrypt
         String url = tblAccountTable.getValueAt(rowIndex, 3).toString();
         String groupname = tblAccountTable.getValueAt(rowIndex, 4).toString(); 
         System.out.println("From updation Main : " + title + "username" + username + "pwd" +password+ "url" +url+ "group" +groupname);
@@ -715,6 +838,7 @@ public class MainFrame extends javax.swing.JFrame {
         } 
     }//GEN-LAST:event_tblAccountTableKeyReleased
 
+    //Click of drop down edit button
     private void btnEditGroupActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnEditGroupActionPerformed
         DefaultTableModel model = (DefaultTableModel) tblAccountTable.getModel();
         //selected row from table
@@ -748,6 +872,99 @@ public class MainFrame extends javax.swing.JFrame {
       });
     }//GEN-LAST:event_btnEditGroupActionPerformed
 
+    private void copyToClipBoardMethod(String text, String message){
+        
+     String myString = String.valueOf(text);
+     StringSelection stringSelection = new StringSelection (myString);
+     Clipboard clpbrd = Toolkit.getDefaultToolkit().getSystemClipboard ();
+     clpbrd.setContents (stringSelection, null);
+     
+     //display copied message in the middle of the screen
+     ToastMessage t; 
+     t = new ToastMessage(message); 
+     t.showtoast(); 
+    }
+    
+    //Click on drop down copy password
+    private void btnCopyPasswordActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCopyPasswordActionPerformed
+         int rowIndex = tblAccountTable.getSelectedRow();
+         String password = tblAccountTable.getValueAt(rowIndex, 2).toString();
+        copyToClipBoardMethod(password, "Password is copied");
+    }//GEN-LAST:event_btnCopyPasswordActionPerformed
+
+    private void btnCopyUsernameActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCopyUsernameActionPerformed
+        int rowIndex = tblAccountTable.getSelectedRow();
+        String username = tblAccountTable.getValueAt(rowIndex, 1).toString();
+        copyToClipBoardMethod(username, "Username is copied");
+    }//GEN-LAST:event_btnCopyUsernameActionPerformed
+
+    private void btnCopyURLActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCopyURLActionPerformed
+        int rowIndex = tblAccountTable.getSelectedRow();
+        String url = tblAccountTable.getValueAt(rowIndex, 3).toString();
+        copyToClipBoardMethod(url, "URL is copied");
+    }//GEN-LAST:event_btnCopyURLActionPerformed
+
+    //Identifying double click, and if yes then copy the cell data
+    private void tblAccountTableMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tblAccountTableMouseClicked
+        if (evt.getClickCount() == 2) {
+ 
+        int row = tblAccountTable.rowAtPoint(evt.getPoint());
+        int col= tblAccountTable.columnAtPoint(evt.getPoint());
+
+        if(col == 1){
+        String username = tblAccountTable.getValueAt(row, 1).toString();
+        copyToClipBoardMethod(username, "Username is copied");
+        }
+        else if (col == 2){
+        String password = tblAccountTable.getValueAt(row, 2).toString();
+        copyToClipBoardMethod(password, "Password is copied");
+        }
+        else if (col == 3){
+        int rowIndex = tblAccountTable.getSelectedRow();
+        String url = tblAccountTable.getValueAt(rowIndex, 3).toString();
+        copyToClipBoardMethod(url, "URL is copied");
+        }
+        else if (col == 0){
+        String title = tblAccountTable.getValueAt(row, 0).toString();
+        copyToClipBoardMethod(title, "Title is copied");
+        }
+        else if (col == 4){
+        String groupname = tblAccountTable.getValueAt(row, 4).toString();
+        copyToClipBoardMethod(groupname, "Group name is copied");
+        }
+        }      
+    }//GEN-LAST:event_tblAccountTableMouseClicked
+
+    private void txtSearchBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtSearchBoxActionPerformed
+           lblSearchButtonMouseReleased(null);
+    }//GEN-LAST:event_txtSearchBoxActionPerformed
+
+  // Search Box code  
+    private void txtSearchBoxFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtSearchBoxFocusGained
+        if(txtSearchBox.getForeground() == Color.gray){
+            txtSearchBox.setForeground(null);
+            txtSearchBox.setText("");
+        }
+    }//GEN-LAST:event_txtSearchBoxFocusGained
+
+    private void txtSearchBoxFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtSearchBoxFocusLost
+       searchLostFocus();
+    }//GEN-LAST:event_txtSearchBoxFocusLost
+
+    private void lblSearchButtonMouseReleased(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_lblSearchButtonMouseReleased
+        if(txtSearchBox.getForeground() != Color.gray){
+                 fillAccountTable("", txtSearchBox.getText().trim());  
+        }
+    }//GEN-LAST:event_lblSearchButtonMouseReleased
+
+    private void searchLostFocus(){
+         if(txtSearchBox.getText().isEmpty()){
+            txtSearchBox.setForeground(Color.gray);
+            txtSearchBox.setText("Search Title...");
+        }
+    }
+    
+    
     /**
      * @param args the command line arguments
      */
@@ -786,17 +1003,24 @@ public class MainFrame extends javax.swing.JFrame {
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnAddEntry;
     private javax.swing.JButton btnAddGroup;
+    private javax.swing.JMenuItem btnCopyPassword;
+    private javax.swing.JMenuItem btnCopyURL;
+    private javax.swing.JMenuItem btnCopyUsername;
     private javax.swing.JMenuItem btnDeleteGroup;
     private javax.swing.JMenuItem btnDeletePopUpMenu;
     private javax.swing.JMenuItem btnEditGroup;
     private javax.swing.JMenuItem btnEditPopupMenu;
+    private javax.swing.JButton btnLogout;
+    private javax.swing.JPanel jPanel1;
     private javax.swing.JPopupMenu jPopupMenu1;
     private javax.swing.JPopupMenu jPopupMenu2;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane3;
+    private javax.swing.JLabel lblLogin;
+    private javax.swing.JLabel lblSearchButton;
     private javax.swing.JLabel lblWelcomeMessage;
     private javax.swing.JTable tblAccountTable;
     private javax.swing.JTable tblList;
-    private javax.swing.JButton test;
+    private javax.swing.JTextField txtSearchBox;
     // End of variables declaration//GEN-END:variables
 }
