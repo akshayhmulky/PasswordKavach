@@ -46,6 +46,9 @@ public class AddAccount extends javax.swing.JFrame {
         initComponents();
         loadComboBox("");   
         showpassword();
+        ImageIcon icon = new ImageIcon(getClass().getResource("/resources/LOGO.png"));
+        setIconImage(icon.getImage());
+        
 //        showhidePasswordImage.setIcon(new ImageIcon(new javax.swing.ImageIcon(getClass().getResource("/resources/hidePasswordBig.png")).getImage().getScaledInstance(20, 20, Image.SCALE_DEFAULT)));
         //showhidePasswordImage.setIcon(new ImageIcon(new javax.swing.ImageIcon(getClass().getResource("/resources/hidePasswordSmall.png")).getImage().getScaledInstance(200, 50, Image.SCALE_SMOOTH)));
     }
@@ -131,6 +134,11 @@ public class AddAccount extends javax.swing.JFrame {
         lblGroup.setText("Group:");
 
         txtURL.setBorder(javax.swing.BorderFactory.createEmptyBorder(1, 5, 1, 1));
+        txtURL.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                txtURLActionPerformed(evt);
+            }
+        });
 
         lblURL.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
         lblURL.setText("URL:");
@@ -430,11 +438,11 @@ public class AddAccount extends javax.swing.JFrame {
     // Add Account button
     private void btnOKActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnOKActionPerformed
         
-     if(btnOK.getText().equals("ADD")){
+     if(btnOK.getText().equals("Add")){
          //Adding an entry
          addEntryActionPerform();
      }   
-     if(btnOK.getText().equals("UPDATE")){
+     if(btnOK.getText().equals("Update")){
             
         int input = JOptionPane.showConfirmDialog (null, "Are you sure you wanna Save?","Warning",JOptionPane.YES_NO_OPTION);
         if(input == JOptionPane.YES_OPTION){
@@ -488,6 +496,10 @@ public class AddAccount extends javax.swing.JFrame {
     private void btnCancelActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCancelActionPerformed
         this.dispose();
     }//GEN-LAST:event_btnCancelActionPerformed
+
+    private void txtURLActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtURLActionPerformed
+        btnOKActionPerformed(null);
+    }//GEN-LAST:event_txtURLActionPerformed
 
     /**
      * @param args the command line arguments

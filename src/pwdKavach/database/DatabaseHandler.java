@@ -31,9 +31,18 @@ public class DatabaseHandler {
 
     //constructor
     private DatabaseHandler() {
+        
         createConnection(); // call below method
     }
 
+    	static {
+		try {
+			Class.forName("org.sqlite.JDBC");
+		} catch (ClassNotFoundException e) {
+			System.out.println("error connection JDBC");
+		}
+	}
+    
     //create connection
     private void createConnection() {
         
@@ -42,11 +51,32 @@ public class DatabaseHandler {
             config.enforceForeignKeys(true);  // to make child record delete on deletion of group
             
         try {
-            conn = DriverManager.getConnection("jdbc:sqlite:pwdKavach.db", config.toProperties());
+            //conn = DriverManager.getConnection("jdbc:sqlite:pwdKavach.db", config.toProperties());
+           // conn = DriverManager.getConnection("jdbc:sqlite::resource:pwdKavach.db", config.toProperties());
+            conn = DriverManager.getConnection("jdbc:sqlite::resource:" +getClass().getResource("/resources/pwdKavach.db"), config.toProperties());
+
+            System.out.println("connected");
+            
         } catch (SQLException e) {
             System.out.println("Create connection exception" + e.getMessage());
         }
     }
+    
+    //create tables:
+//     public void createTable() throws SQLException {
+//    Statement st = conn.createStatement();
+//    st.execute("CREATE TABLE users (id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE, username TEXT NOT NULL UNIQUE, password TEXT NOT NULL, salt TEXT NOT NULL)");
+//  }
+//    
+    
+    
+    
+    
+    
+    
+    
+    
+    
     
     //Dont allow to create instance from outside DatabaseHandler class
     public static DatabaseHandler getInstance()

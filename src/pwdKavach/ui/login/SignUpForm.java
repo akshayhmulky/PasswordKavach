@@ -137,6 +137,11 @@ public class SignUpForm extends javax.swing.JFrame {
                 txtPassword2FocusLost(evt);
             }
         });
+        txtPassword2.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                txtPassword2ActionPerformed(evt);
+            }
+        });
 
         showhidePasswordImage2.setBackground(new java.awt.Color(153, 255, 255));
         showhidePasswordImage2.setForeground(new java.awt.Color(255, 255, 255));
@@ -460,6 +465,10 @@ public class SignUpForm extends javax.swing.JFrame {
     private void txtPassword2FocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtPassword2FocusLost
         setPassword2FieldText();
     }//GEN-LAST:event_txtPassword2FocusLost
+
+    private void txtPassword2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtPassword2ActionPerformed
+        btnSignUpActionPerformed(null);
+    }//GEN-LAST:event_txtPassword2ActionPerformed
 
     private void setPassword2FieldText() {
         if (String.valueOf(txtPassword2.getPassword()).isEmpty()) {

@@ -6,6 +6,7 @@
 package pwdKavach.ui.addgroup;
 
 import java.awt.event.WindowEvent;
+import javax.swing.ImageIcon;
 import javax.swing.JOptionPane;
 import pwdKavach.database.DatabaseHandler;
 import pwdKavach.ui.login.LoginForm;
@@ -27,6 +28,8 @@ public class AddGroup extends javax.swing.JFrame {
     public AddGroup() {
         handler = DatabaseHandler.getInstance();
         initComponents();
+        ImageIcon icon = new ImageIcon(getClass().getResource("/resources/LOGO.png"));
+        setIconImage(icon.getImage());
         
     }
 
@@ -72,6 +75,12 @@ public class AddGroup extends javax.swing.JFrame {
         lblGroupName.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
         lblGroupName.setText("Group Name:");
 
+        txtGroupName.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                txtGroupNameActionPerformed(evt);
+            }
+        });
+
         btnOK.setBackground(new java.awt.Color(51, 51, 255));
         btnOK.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
         btnOK.setForeground(new java.awt.Color(255, 255, 255));
@@ -107,9 +116,9 @@ public class AddGroup extends javax.swing.JFrame {
                         .addComponent(txtGroupName, javax.swing.GroupLayout.PREFERRED_SIZE, 144, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addGap(59, 59, 59)
-                        .addComponent(btnOK, javax.swing.GroupLayout.PREFERRED_SIZE, 75, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(29, 29, 29)
-                        .addComponent(btnCancel))
+                        .addComponent(btnOK, javax.swing.GroupLayout.PREFERRED_SIZE, 86, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(18, 18, 18)
+                        .addComponent(btnCancel, javax.swing.GroupLayout.PREFERRED_SIZE, 87, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addGap(95, 95, 95)
                         .addComponent(lblWelcomeAddGroup)))
@@ -159,7 +168,7 @@ public class AddGroup extends javax.swing.JFrame {
        String groupname = txtGroupName.getText();
       
       if(groupname.isEmpty()){
-          JOptionPane.showMessageDialog(null, "Please select group", "", JOptionPane.ERROR_MESSAGE);
+          JOptionPane.showMessageDialog(null, "Please Enter group", "", JOptionPane.ERROR_MESSAGE);
           return;  // to close popup window
       }
       
@@ -182,11 +191,11 @@ public class AddGroup extends javax.swing.JFrame {
     
     private void btnOKActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnOKActionPerformed
       
-     if(btnOK.getText().equals("ADD")){
+     if(btnOK.getText().equals("Add")){
          addGroupAction();
      }
      
-     if(btnOK.getText().equals("UPDATE"))
+     if(btnOK.getText().equals("Update"))
      {
           int input = JOptionPane.showConfirmDialog (null, "Are you sure you wanna Save?","Warning",JOptionPane.YES_NO_OPTION);
           System.out.println("Group Id for update" + groupID);
@@ -213,6 +222,10 @@ public class AddGroup extends javax.swing.JFrame {
     private void btnCancelActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCancelActionPerformed
         this.dispose();
     }//GEN-LAST:event_btnCancelActionPerformed
+
+    private void txtGroupNameActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtGroupNameActionPerformed
+        btnOKActionPerformed(null);
+    }//GEN-LAST:event_txtGroupNameActionPerformed
 
     
     /**

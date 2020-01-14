@@ -16,6 +16,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import javax.swing.DefaultListModel;
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JOptionPane;
 import javax.swing.JTable;
@@ -52,6 +53,8 @@ public class MainFrame extends javax.swing.JFrame {
     public MainFrame() {
         handler = DatabaseHandler.getInstance();
         initComponents();
+        ImageIcon icon = new ImageIcon(getClass().getResource("/resources/LOGO.png"));
+        setIconImage(icon.getImage());
         
         if(!isListTableEmpty()){
             loadAllCategories();
@@ -463,12 +466,13 @@ public class MainFrame extends javax.swing.JFrame {
                     .addComponent(lblWelcomeMessage)
                     .addComponent(lblLogin))
                 .addGap(11, 11, 11)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(btnAddEntry)
-                    .addComponent(btnLogout)
-                    .addComponent(btnAddGroup, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(txtSearchBox, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(lblSearchButton, javax.swing.GroupLayout.PREFERRED_SIZE, 24, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(txtSearchBox, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(lblSearchButton, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 24, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(btnAddEntry)
+                        .addComponent(btnLogout)
+                        .addComponent(btnAddGroup, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addGap(11, 11, 11)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jScrollPane3, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 116, Short.MAX_VALUE)
@@ -499,7 +503,7 @@ public class MainFrame extends javax.swing.JFrame {
         addAccount.pack();
         addAccount.setLocationRelativeTo(null);
         addAccount.setVisible(true);
-        addAccount.setbuttonOK("ADD");
+        addAccount.setbuttonOK("Add");
         //addAccount.setAlwaysOnTop(true);
         this.setEnabled(false);
 
@@ -584,7 +588,7 @@ public class MainFrame extends javax.swing.JFrame {
         AddGroup addGroup = new AddGroup();
         addGroup.pack();
         addGroup.setLocationRelativeTo(null);
-        addGroup.setGroupButton("ADD");
+        addGroup.setGroupButton("Add");
         addGroup.setVisible(true);
         
         addGroup.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
@@ -721,7 +725,7 @@ public class MainFrame extends javax.swing.JFrame {
         String groupname = tblAccountTable.getValueAt(rowIndex, 4).toString(); 
         System.out.println("From updation Main : " + title + "username" + username + "pwd" +password+ "url" +url+ "group" +groupname);
         int groupID = handler.findGroupID(groupname);
-        int accID = handler.findAccountId(LoginForm.getID(), groupID , title, username, password, url, groupname);
+        int accID = handler.findAccountId(LoginForm.getID(), groupID , title, username, EncryptDecrypt.encryptAccountPassword(password), url, groupname);
         AddAccount popUp = new AddAccount(accID, title, username, password, url, groupname);
         
         //AddAccount popUp = new AddAccount();
@@ -729,7 +733,7 @@ public class MainFrame extends javax.swing.JFrame {
         popUp.setLocationRelativeTo(null);
         popUp.setVisible(true);
         popUp.updateWelcomeTitleLabel("Edit Entry");
-        popUp.setbuttonOK("UPDATE"); // to identify it as update operation
+        popUp.setbuttonOK("Update"); // to identify it as update operation
         popUp.updateEntryActionFillPerform();
         //populateAccountTableForEdit();
         popUp.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
@@ -854,7 +858,7 @@ public class MainFrame extends javax.swing.JFrame {
         popUp.setLocationRelativeTo(null);
         popUp.setVisible(true);
         popUp.setGroupWelcomeTitle("Edit Entry");
-        popUp.setGroupButton("UPDATE"); // to identify it as update operation
+        popUp.setGroupButton("Update"); // to identify it as update operation
         popUp.editGroupAction();
         popUp.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
         
