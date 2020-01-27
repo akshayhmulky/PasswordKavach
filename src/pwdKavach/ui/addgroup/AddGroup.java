@@ -37,6 +37,8 @@ public class AddGroup extends javax.swing.JFrame {
         this();
         this.groupID = groupID;
         this.groupname = groupname;
+        ImageIcon icon = new ImageIcon(getClass().getResource("/resources/LOGO.png"));
+        setIconImage(icon.getImage());
     }
     
     //Set button name
@@ -175,11 +177,13 @@ public class AddGroup extends javax.swing.JFrame {
       if(handler.insertIntoGroupsTable(LoginForm.getID(), groupname)){          
           JOptionPane.showMessageDialog(null, "Group has been created", "Success", JOptionPane.INFORMATION_MESSAGE);
           this.dispatchEvent(new WindowEvent(this, WindowEvent.WINDOW_CLOSING));
+          this.dispose();
       }
       else
       {
           JOptionPane.showMessageDialog(null, "Cannot Create Duplicate group", "Error", JOptionPane.ERROR_MESSAGE);
           this.dispatchEvent(new WindowEvent(this, WindowEvent.WINDOW_CLOSING));
+          this.dispose();
       }  
         
     }

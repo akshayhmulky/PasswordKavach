@@ -135,7 +135,6 @@ public class LoginForm extends javax.swing.JFrame {
 
         txtPassword.setBorder(javax.swing.BorderFactory.createEmptyBorder(1, 5, 1, 1));
         txtPassword.setDragEnabled(true);
-        txtPassword.setEchoChar('\u26ab');
         txtPassword.addFocusListener(new java.awt.event.FocusAdapter() {
             public void focusGained(java.awt.event.FocusEvent evt) {
                 txtPasswordFocusGained(evt);
@@ -373,7 +372,7 @@ public class LoginForm extends javax.swing.JFrame {
     private void txtPasswordFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtPasswordFocusGained
         if (txtPassword.getForeground() == Color.gray) {
             txtPassword.setText("");
-            txtPassword.setEchoChar('\u26AB');
+            txtPassword.setEchoChar('*');
             txtPassword.setForeground(null);
         }
 
@@ -398,14 +397,19 @@ public class LoginForm extends javax.swing.JFrame {
         if (showPassword == false) {
             showPassword = true;
             showhidePasswordImage.setIcon(new ImageIcon(new javax.swing.ImageIcon(getClass().getResource("/resources/closedLock.png")).getImage().getScaledInstance(32, 32, Image.SCALE_DEFAULT)));
-            txtPassword.setEchoChar('\u26AB');
+            if(txtPassword.getEchoChar() != '*'){
+              txtPassword.setEchoChar('*');
+            }
+
 
         } else if (showPassword == true) {
             showPassword = false;
             showhidePasswordImage.setIcon(new ImageIcon(new javax.swing.ImageIcon(getClass().getResource("/resources/openLock.png")).getImage().getScaledInstance(32, 32, Image.SCALE_DEFAULT)));
+           if(txtPassword.getEchoChar() == '*'){
             txtPassword.setEchoChar((char) 0);
-
+           }
         }
+
     }
 
     /**

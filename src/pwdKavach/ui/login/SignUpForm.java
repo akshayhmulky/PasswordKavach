@@ -72,7 +72,7 @@ public class SignUpForm extends javax.swing.JFrame {
         lblLogoMain = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
-        setTitle("Password Kavach");
+        setTitle("Register");
         setMinimumSize(new java.awt.Dimension(272, 247));
         setResizable(false);
 
@@ -80,6 +80,7 @@ public class SignUpForm extends javax.swing.JFrame {
 
         btnSignUp.setBackground(new java.awt.Color(0, 0, 255));
         btnSignUp.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
+        btnSignUp.setForeground(new java.awt.Color(255, 255, 255));
         btnSignUp.setText("Register");
         btnSignUp.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         btnSignUp.addActionListener(new java.awt.event.ActionListener() {
@@ -377,13 +378,20 @@ public class SignUpForm extends javax.swing.JFrame {
     if (showPassword2 == false) {
            showPassword2 = true;
            showhidePasswordImage2.setIcon(new ImageIcon(new javax.swing.ImageIcon(getClass().getResource("/resources/closedLock.png")).getImage().getScaledInstance(32, 32, Image.SCALE_DEFAULT)));
-           txtPassword2.setEchoChar('\u26AB');
+              if(txtPassword2.getEchoChar() != '*'){
+              txtPassword2.setEchoChar('*');
+            }
+           
 
         }
         else if(showPassword2 == true) {
            showPassword2 = false;
            showhidePasswordImage2.setIcon(new ImageIcon(new javax.swing.ImageIcon(getClass().getResource("/resources/openLock.png")).getImage().getScaledInstance(32, 32, Image.SCALE_DEFAULT)));
-           txtPassword2.setEchoChar((char)0);
+             if(txtPassword2.getEchoChar() == '*'){
+             txtPassword2.setEchoChar((char)0);
+            }
+           
+           
            
   }
   }  
@@ -393,13 +401,17 @@ public class SignUpForm extends javax.swing.JFrame {
     if (showPassword1 == false) {
            showPassword1 = true;
            showhidePasswordImage.setIcon(new ImageIcon(new javax.swing.ImageIcon(getClass().getResource("/resources/closedLock.png")).getImage().getScaledInstance(32, 32, Image.SCALE_DEFAULT)));
-           txtPassword1.setEchoChar('\u26AB');
+              if(txtPassword1.getEchoChar() != '*'){
+              txtPassword1.setEchoChar('*');
+            }
 
         }
         else if(showPassword1 == true) {
            showPassword1 = false;
            showhidePasswordImage.setIcon(new ImageIcon(new javax.swing.ImageIcon(getClass().getResource("/resources/openLock.png")).getImage().getScaledInstance(32, 32, Image.SCALE_DEFAULT)));
-           txtPassword1.setEchoChar((char)0);
+             if(txtPassword1.getEchoChar() == '*'){
+             txtPassword1.setEchoChar((char)0);
+            }
            
   }
   }   
@@ -435,7 +447,7 @@ public class SignUpForm extends javax.swing.JFrame {
     private void txtPassword1FocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtPassword1FocusGained
                 if (txtPassword1.getForeground() == Color.gray) {
             txtPassword1.setText("");
-            txtPassword1.setEchoChar('\u26AB');
+            txtPassword1.setEchoChar('*');
             txtPassword1.setForeground(null);
         }
 
@@ -457,7 +469,7 @@ public class SignUpForm extends javax.swing.JFrame {
     private void txtPassword2FocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtPassword2FocusGained
                 if (txtPassword2.getForeground() == Color.gray) {
             txtPassword2.setText("");
-            txtPassword2.setEchoChar('\u26AB');
+            txtPassword2.setEchoChar('*');
             txtPassword2.setForeground(null);
         }
     }//GEN-LAST:event_txtPassword2FocusGained

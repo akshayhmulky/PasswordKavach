@@ -15,17 +15,23 @@ import java.awt.event.WindowEvent;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import javax.swing.DefaultCellEditor;
 import javax.swing.DefaultListModel;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JFormattedTextField;
 import javax.swing.JOptionPane;
+import javax.swing.JPasswordField;
 import javax.swing.JTable;
+import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.JTableHeader;
+import javax.swing.table.TableCellEditor;
+import javax.swing.table.TableColumn;
 import pwdKavach.database.DatabaseHandler;
 import pwdKavach.security.passwordHashing.EncryptDecrypt;
 import pwdKavach.ui.addgroup.AddGroup;
@@ -120,29 +126,24 @@ public class MainFrame extends javax.swing.JFrame {
     
         try {
             
-            System.out.println("loading table");
             while(resultSet.next()){
-                System.out.println("inside resultset");
                 String title = resultSet.getString("title");
-                System.out.println(title);
                 String username = resultSet.getString("username");
                 String password = resultSet.getString("password");
                 String url = resultSet.getString("url");
                 String groupName = resultSet.getString("groupname");
-                
-                
+
                 Object[] row = new Object[5];
-                
+                                
                 row[0] = title;
                 row[1] = username;
-                row[2] = EncryptDecrypt.decryptAccountPassword(password);             
+                row[2] = EncryptDecrypt.decryptAccountPassword(password);                             
                 row[3] = url;
                 row[4] = groupName;
                 
                 tableModel.addRow(row);
-                
-                
-                
+
+             
             }
             
         } catch (SQLException e) {
@@ -152,9 +153,37 @@ public class MainFrame extends javax.swing.JFrame {
         //Making table cell uneditable
         tblAccountTable.setDefaultEditor(Object.class, null); //Disable editing option
         tblAccountTable.setModel(tableModel);
+        
+      // hiding password behind colors  
+      TableColumn  tColumn = tblAccountTable.getColumnModel().getColumn(2);
+      tColumn.setCellRenderer(new ColumnColorRenderer(Color.lightGray, Color.lightGray));
+
+        
         //tableModel.fireTableDataChanged();
         
     }
+    
+//    private void showPasswordFildInTable(){
+//        DefaultTableModel model = new DefaultTableModel(data, columnNames);
+//        JTable table = new JTable(model)
+//        {
+//            //  Determine editor to be used by row
+//            public TableCellEditor getCellEditor(int row, int column)
+//            {
+//                int modelColumn = convertColumnIndexToModel( column );
+//
+//                if (modelColumn == 1 && row < 3)
+//                {
+//                    JComboBox<String> comboBox1 = new JComboBox<String>( editorData.get(row));
+//                    return new DefaultCellEditor( comboBox1 );
+//                }
+//                else
+//                    return super.getCellEditor(row, column);
+//            }
+//        };
+//    }
+//    
+    
    
     private void loadAllListTable(){
         fillListTable("");
@@ -166,6 +195,7 @@ public class MainFrame extends javax.swing.JFrame {
     
     DefaultTableModel tableModel = new DefaultTableModel();    
     tableModel.setColumnIdentifiers(columnNames); 
+
     
 //    tblList.getTableHeader().setOpaque(false);
 //    tblList.getTableHeader().setBackground(Color.red);
@@ -179,9 +209,7 @@ public class MainFrame extends javax.swing.JFrame {
     
         try {
             
-            System.out.println("loading List table");
             while(resultSet.next()){
-                System.out.println("inside resultset");
                 String groupName = resultSet.getString("groupname");
                 
                 
@@ -537,6 +565,7 @@ public class MainFrame extends javax.swing.JFrame {
                 
                 tblList.requestFocus();
                 tblList.changeSelection(selectedIndexFromComboBox,0,false, false);
+                TableListSelection();
                 
                 //IF NEED TO SELECT LAST ELEMENAT OF A ACCOUNT TABLE THEN CAN USE THIS
 //                int lastRow = tblAccountTable.convertRowIndexToView(tblAccountTable.getRowCount() - 1);
@@ -544,7 +573,6 @@ public class MainFrame extends javax.swing.JFrame {
                 
                   
               //}   
-                  System.out.println(selectedItemFromComboBox);
                   e.getWindow().dispose();
                 
           }
@@ -598,10 +626,11 @@ public class MainFrame extends javax.swing.JFrame {
         public void windowClosing(java.awt.event.WindowEvent windowEvent) {
         int row = tblList.getSelectedRow();
         loadAllListTable();
-//        tblList.requestFocus();
-//        tblList.changeSelection(row,0,false, false);
-        int lastRow = tblList.convertRowIndexToView(tblList.getRowCount() - 1);
-        tblList.setRowSelectionInterval(lastRow, lastRow);
+        tblList.requestFocus();
+        tblList.changeSelection(row,0,false, false);
+        TableListSelection();
+//        int lastRow = tblList.convertRowIndexToView(tblList.getRowCount() - 1);
+//        tblList.setRowSelectionInterval(lastRow, lastRow);
         
     }
 });
@@ -723,7 +752,7 @@ public class MainFrame extends javax.swing.JFrame {
         String password = tblAccountTable.getValueAt(rowIndex, 2).toString(); //Decrypt
         String url = tblAccountTable.getValueAt(rowIndex, 3).toString();
         String groupname = tblAccountTable.getValueAt(rowIndex, 4).toString(); 
-        System.out.println("From updation Main : " + title + "username" + username + "pwd" +password+ "url" +url+ "group" +groupname);
+       // System.out.println("From updation Main : " + title + "username" + username + "pwd" +password+ "url" +url+ "group" +groupname);
         int groupID = handler.findGroupID(groupname);
         int accID = handler.findAccountId(LoginForm.getID(), groupID , title, username, EncryptDecrypt.encryptAccountPassword(password), url, groupname);
         AddAccount popUp = new AddAccount(accID, title, username, password, url, groupname);
@@ -760,7 +789,7 @@ public class MainFrame extends javax.swing.JFrame {
                 
                 
               //}   
-                  System.out.println(selectedItemFromComboBox);
+                //  System.out.println(selectedItemFromComboBox);
                 e.getWindow().dispose();
           }
       });
@@ -781,7 +810,7 @@ public class MainFrame extends javax.swing.JFrame {
         String groupname = tblList.getValueAt(rowIndex, 0).toString();
 
         int groupID = handler.findGroupID(groupname);
-        System.out.println("group id"+ groupID);
+       // System.out.println("group id"+ groupID);
 
         if(handler.deleteGroup(groupID)){
             
@@ -790,6 +819,7 @@ public class MainFrame extends javax.swing.JFrame {
             loadAllListTable();
             tblList.requestFocus();
             tblList.changeSelection(0,0,false, false);
+            TableListSelection();
         }
         else{
             JOptionPane.showMessageDialog(null, "Group was not deleted", "Failed", JOptionPane.ERROR_MESSAGE);
@@ -868,8 +898,10 @@ public class MainFrame extends javax.swing.JFrame {
            public void windowClosing(WindowEvent e)
           {
                 fillListTable("");
+                fillAccountTable("","");
                 tblList.requestFocus();
                 tblList.changeSelection(rowIndex,0,false, false);
+                TableListSelection();
   
                 e.getWindow().dispose();
           }

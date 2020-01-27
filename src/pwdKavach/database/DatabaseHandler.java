@@ -54,7 +54,7 @@ public class DatabaseHandler {
             //conn = DriverManager.getConnection("jdbc:sqlite:pwdKavach.db", config.toProperties());
            // conn = DriverManager.getConnection("jdbc:sqlite::resource:pwdKavach.db", config.toProperties());
             conn = DriverManager.getConnection("jdbc:sqlite::resource:" +getClass().getResource("/resources/pwdKavach.db"), config.toProperties());
-
+            
             System.out.println("connected");
             
         } catch (SQLException e) {
